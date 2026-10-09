@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InvenTrack · MVP</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='20 20 160 160'%3E%3Cpath d='M100 38L154 69L100 100L46 69Z' fill='%235BA8FF'/%3E%3Cpath d='M46 69L100 100L100 162L46 131Z' fill='%231D6FE8'/%3E%3Cpath d='M154 69L100 100L100 162L154 131Z' fill='%230F2A43'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0B1B2B; --navy2:#0F2A43; --blue:#1D6FE8; --sky:#5BA8FF; --teal:#14D3B0;
+  --bg:#F3F6FB; --card:#FFFFFF; --ink:#0F2A43; --mut:#5B6B7C; --line:#E3E9F1;
+  --ok:#0E9F6E; --okbg:#DDF7EC; --warn:#B7791F; --warnbg:#FFF1CC; --bad:#D6336C; --badbg:#FFE1EA; --info:#1D6FE8; --infobg:#E2EEFF;
+  --r:14px; --sh:0 1px 2px rgba(15,42,67,.06),0 8px 24px rgba(15,42,67,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,'Segoe UI',system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+.mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace}
+/* layout */
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.side{background:linear-gradient(180deg,#0B1B2B 0%,#0F2A43 100%);color:#C9D6E4;padding:22px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
+.side .logo{padding:2px 6px 18px}
+.side .logo img,.side .logo svg{width:100%;max-width:190px;height:auto;display:block}
+.side h6{margin:14px 10px 6px;font-size:10.5px;letter-spacing:.14em;color:#6F88A3;font-weight:700;text-transform:uppercase}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#C9D6E4;text-decoration:none;font-weight:500;transition:.15s}
+.nav a svg{width:19px;height:19px;flex:none;opacity:.9}
+.nav a:hover{background:rgba(91,168,255,.12);color:#fff}
+.nav a.on{background:linear-gradient(90deg,rgba(29,111,232,.95),rgba(29,111,232,.55));color:#fff;box-shadow:0 6px 18px rgba(29,111,232,.35)}
+.nav a small{margin-left:auto;font-size:10.5px;background:rgba(255,255,255,.12);border-radius:6px;padding:1px 7px;font-weight:700}
+.side .foot{margin-top:auto;font-size:12px;color:#7F97B1;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.04)}
+.side .foot b{color:#fff}
+main{min-width:0}
+.top{display:flex;align-items:center;gap:14px;padding:16px 28px;background:rgba(243,246,251,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line)}
+.top .crumb{font-size:12px;color:var(--mut);font-weight:600;letter-spacing:.04em}
+.top h1{margin:0;font-size:21px;letter-spacing:-.02em}
+.top .sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 6px;box-shadow:var(--sh);font-weight:600;font-size:12.5px}
+.av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--teal));color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800}
+.role{font-weight:600;color:var(--mut);font-size:11.5px}
+.content{padding:24px 28px 60px;max-width:1500px}
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:18px}
+.card h2{margin:0 0 4px;font-size:16px;letter-spacing:-.01em}
+.card .sub{color:var(--mut);font-size:12.5px;margin-bottom:14px}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:1.25fr 1fr}.g2b{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.row{display:flex;gap:12px;align-items:center}.wrap{flex-wrap:wrap}
+.sp1{flex:1}
+/* forms */
+label{white-space:nowrap;display:block;font-size:11.5px;font-weight:700;color:#35506B;margin-bottom:5px;letter-spacing:.02em}
+label i{font-style:normal;font-weight:500;color:#8A9BB0;font-family:'JetBrains Mono',monospace;font-size:10.5px;margin-left:4px}
+select,input[type=text],input[type=number],input[type=date]{width:100%;border:1px solid #CBD6E3;border-radius:10px;padding:9px 11px;background:#fff;font:inherit;color:var(--ink);outline:none;transition:.15s}
+select:focus,input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,111,232,.15)}
+.fld{margin-bottom:12px}
+.btn{border:0;border-radius:10px;padding:10px 16px;font-weight:700;background:var(--blue);color:#fff;box-shadow:0 6px 16px rgba(29,111,232,.28);transition:.15s;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.btn.ok{background:var(--ok);box-shadow:0 6px 16px rgba(14,159,110,.28)}
+.btn.bad{background:var(--bad);box-shadow:0 6px 16px rgba(214,51,108,.25)}
+.btn.ghost{background:#fff;color:var(--blue);border:1px solid #BCD3F7;box-shadow:none}
+.btn.sm{padding:6px 11px;font-size:12.5px;border-radius:8px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn svg{width:16px;height:16px}
+/* badges */
+.tag{white-space:nowrap;display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700}
+.t-ok{background:var(--okbg);color:#077a53}.t-warn{background:var(--warnbg);color:#8a5b00}.t-bad{background:var(--badbg);color:#b3124f}.t-info{background:var(--infobg);color:#1558c0}.t-mut{background:#EEF2F7;color:#51657A}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+/* tables */
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#6B7F95;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{white-space:normal;padding:11px 10px;border-bottom:1px solid #EEF2F7;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+.pn{display:flex;align-items:center;gap:11px;min-width:0}.pn>div{min-width:0}.line .pic{width:32px;height:32px;border-radius:9px}.line .pic svg{width:19px;height:19px}.flow text,.chart text{font-family:Inter,'Segoe UI',Arial,sans-serif}
+.pn b{display:block;font-size:13.5px}.pn span{color:var(--mut);font-size:11.5px}
+.pic{width:42px;height:42px;border-radius:11px;flex:none;display:grid;place-items:center}
+.pic svg{width:26px;height:26px}
+/* product cards */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px}
+.pc{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;transition:.15s;display:flex;flex-direction:column;gap:6px}
+.pc:hover{border-color:#9CC1F5;box-shadow:0 8px 22px rgba(29,111,232,.12);transform:translateY(-2px)}
+.pc .pic{width:100%;height:84px;border-radius:11px}.pc .pic svg{width:46px;height:46px}
+.pc b{font-size:13px}.pc .pr{font-weight:800;font-size:15px;color:var(--ink)}
+.pc .st{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px}.pc .pr{white-space:nowrap}
+/* kpi */
+.kpi{display:flex;gap:14px;align-items:center}
+.kpi .ic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;flex:none}
+.kpi .ic svg{width:24px;height:24px}
+.kpi b{font-size:26px;letter-spacing:-.03em;display:block;line-height:1.1}.kpi span{color:var(--mut);font-size:12.5px;font-weight:600}
+/* hero */
+.hero{border-radius:20px;padding:30px 34px;color:#fff;background:radial-gradient(900px 300px at 85% -10%,rgba(91,168,255,.45),transparent 60%),linear-gradient(120deg,#0B1B2B,#0F2A43 55%,#12467f);position:relative;overflow:hidden;display:grid;grid-template-columns:.95fr 1.1fr;gap:20px;align-items:center;box-shadow:0 18px 40px rgba(11,27,43,.25)}
+.hero h2{font-size:27px;margin:0 0 10px;letter-spacing:-.02em;line-height:1.2}
+.hero p{margin:0 0 18px;color:#B8CBE0;font-size:14.5px;max-width:520px}
+.hero .pill{display:inline-block;background:rgba(20,211,176,.15);color:#6CF0D6;border:1px solid rgba(20,211,176,.35);border-radius:999px;padding:4px 12px;font-size:11.5px;font-weight:800;letter-spacing:.08em;margin-bottom:12px}
+.hero .btn.ghost{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.25)}
+.flow{width:100%}
+/* hu cards on home */
+.hucard{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;transition:.15s;position:relative;overflow:hidden}
+.hucard:hover{transform:translateY(-3px);border-color:#9CC1F5}
+.hucard .n{font-weight:800;font-size:12px;color:var(--blue);letter-spacing:.1em}
+.hucard h3{margin:0;font-size:15.5px}
+.hucard p{margin:0;color:var(--mut);font-size:12.5px}
+.hucard .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--infobg);color:var(--blue)}
+.hucard .ic svg{width:21px;height:21px}
+/* lines / cart */
+.line{display:grid;grid-template-columns:1fr 58px 100px 58px 28px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.line input{padding:6px 8px;text-align:right}
+.line .x{border:0;background:#fff0f4;color:var(--bad);border-radius:8px;width:28px;height:28px;font-weight:800}
+.lh{display:grid;grid-template-columns:1fr 58px 100px 58px 28px;gap:8px;font-size:10.5px;color:#7a8da3;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding-bottom:6px}
+.line span{white-space:nowrap}.pc button{margin-top:auto}.line.l3,.lh.l3{grid-template-columns:1fr 90px 30px}
+.line.l4,.lh.l4{grid-template-columns:1fr 78px 92px 30px}
+.total{display:flex;justify-content:space-between;align-items:center;padding:14px 0 4px;font-size:15px}
+.total b{font-size:24px;letter-spacing:-.02em}
+.alert{border-radius:10px;padding:10px 12px;font-size:12.5px;font-weight:600;margin:10px 0;display:flex;gap:9px;align-items:flex-start}
+.alert.bad{background:var(--badbg);color:#8d1040}.alert.ok{background:var(--okbg);color:#066a47}.alert.info{background:var(--infobg);color:#164f9f}
+details.json{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:#0B1B2B;color:#cfe3ff}
+details.json summary{cursor:pointer;padding:9px 12px;font-size:12px;font-weight:700;color:#9FC4F5;list-style:none;display:flex;align-items:center;gap:8px}
+details.json pre{margin:0;padding:4px 14px 14px;font-size:11.5px;line-height:1.55;overflow:auto;max-height:260px;color:#BFE0FF}
+/* stepper */
+.steps{display:flex;align-items:center;gap:0;margin:8px 0}
+.steps .s{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:#8a9bb0}
+.steps .c{width:22px;height:22px;border-radius:50%;border:2px solid #CBD6E3;display:grid;place-items:center;background:#fff;font-size:11px}
+.steps .bar{height:2px;width:34px;background:#CBD6E3;margin:0 6px}
+.steps .s.d{color:var(--ok)}.steps .s.d .c{background:var(--ok);border-color:var(--ok);color:#fff}
+.steps .s.n{color:var(--blue)}.steps .s.n .c{border-color:var(--blue);color:var(--blue)}
+.steps .bar.d{background:var(--ok)}
+.tcard{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fff}
+.tcard .hd{display:flex;align-items:center;gap:10px}
+.route{display:flex;align-items:center;gap:8px;font-weight:700}
+.route svg{width:18px;height:18px;color:var(--blue)}
+/* stock bar */
+.bar{height:8px;border-radius:99px;background:#E9EFF6;overflow:hidden;min-width:90px}
+.bar i{display:block;height:100%;border-radius:99px}
+/* timeline */
+.tl{position:relative;padding-left:26px}
+.tl:before{content:'';position:absolute;left:10px;top:6px;bottom:6px;width:2px;background:#DDE6F0}
+.ev{position:relative;padding:8px 0 14px}
+.ev .pt{position:absolute;left:-26px;top:9px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800;box-shadow:0 0 0 4px #fff}
+.ev .pt.in{background:var(--ok)}.ev .pt.out{background:var(--bad)}
+.ev .h{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ev .m{color:var(--mut);font-size:12px}
+/* chips filter */
+.seg{display:inline-flex;background:#EAF0F8;border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:8px;font-weight:700;color:#4a6179;font-size:12.5px}
+.seg button.on{background:#fff;color:var(--blue);box-shadow:0 1px 4px rgba(15,42,67,.12)}
+/* toast */
+#toasts{position:fixed;right:22px;top:76px;z-index:60;display:flex;flex-direction:column;gap:10px;width:380px;max-width:calc(100vw - 30px)}
+.toast{background:#0B1B2B;color:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 14px 34px rgba(11,27,43,.35);display:flex;gap:12px;animation:in .25s ease}
+.toast .code{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;border-radius:7px;padding:3px 8px;height:fit-content;white-space:nowrap}
+.toast .code.s{background:rgba(20,211,176,.18);color:#6CF0D6}.toast .code.e{background:rgba(255,110,150,.18);color:#ff9bb8}
+.toast b{display:block;font-size:13.5px}.toast span{color:#a9bfd6;font-size:12.5px}
+/* login */
+.login{display:none;min-height:100vh;grid-template-columns:1.05fr 1fr;background:var(--bg)}
+body.anon .login{display:grid} body.anon .app{display:none}
+.login .brand{background:linear-gradient(160deg,#0B1B2B 0%,#0F2A43 60%,#12406b 100%);color:#C9D6E4;padding:48px 56px;display:flex;flex-direction:column;gap:18px;justify-content:center}
+.login .brand svg,.login .brand img{max-width:300px;height:auto}
+.login .brand h2{margin:10px 0 0;color:#fff;font-size:28px;letter-spacing:-.02em;line-height:1.2}
+.login .brand p{margin:0;max-width:430px;color:#9fb6cf;font-size:15px}
+.login .brand .pill{display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;color:#6CF0D6;width:fit-content}
+.login .box{display:grid;place-items:center;padding:32px}
+.login .lc{width:100%;max-width:430px}
+.login .lc h1{margin:0 0 4px;font-size:26px;letter-spacing:-.02em}
+.login .lc .sub{color:var(--mut);margin-bottom:18px}
+.login input[type=password],.login input[type=email]{width:100%;border:1px solid #CBD6E3;border-radius:10px;padding:11px 12px;background:#fff;font:inherit;color:var(--ink);outline:none}
+.login input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,111,232,.15)}
+.login .btn{width:100%;justify-content:center;padding:12px 16px;margin-top:6px}
+.login .demo{margin-top:18px;font-size:12px;color:var(--mut)}
+.login .demo button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 10px;margin:4px 6px 0 0;font-size:12px;font-weight:600;color:var(--ink)}
+.login .demo button:hover{border-color:var(--blue);color:var(--blue)}
+.login .err{display:none;background:var(--badbg);color:#9b1c4c;border-radius:10px;padding:10px 12px;font-weight:600;font-size:13px;margin-bottom:12px}
+.login .err.on{display:block}
+.jwtchip{font-size:11px;color:var(--mut);background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 10px;cursor:default}
+.outbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;font-weight:700;color:var(--ink)}
+.outbtn:hover{border-color:var(--bad);color:var(--bad)}
+@media(max-width:860px){.login{grid-template-columns:1fr}.login .brand{padding:28px}}
+@keyframes in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.reset{margin-top:6px;background:transparent;color:rgba(159,182,207,.14);border:0;border-radius:6px;padding:4px 8px;font-size:10px;font-weight:600;align-self:flex-start;transition:.2s}
+.reset:hover{color:rgba(159,182,207,.75);background:rgba(255,255,255,.06)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mut);font-weight:600;flex-wrap:wrap}
+.legend span:before{content:'';display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;background:var(--c)}
+@media(max-width:1180px){.g2,.g2b,.hero{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){.app{grid-template-columns:1fr}.side{position:relative;height:auto;flex-direction:row;flex-wrap:wrap;padding:12px}.side .logo{width:100%;padding:0 0 6px}.side h6,.side .foot,.reset{display:none}.nav{display:flex;flex-wrap:wrap;gap:4px}.nav a{padding:8px 10px;font-size:12.5px}.nav a small{display:none}.content{padding:16px}.top{padding:12px 16px;flex-wrap:wrap}.g3,.g4{grid-template-columns:1fr}.line,.lh{grid-template-columns:1fr 64px 80px 64px 26px}}
+</style>
+</head>
+<body class="anon">
+<div class="login" id="login"></div>
+<div class="app">
+  <aside class="side">
+    <div class="logo" id="logo"></div>
+    <h6>Core del negocio</h6>
+    <nav class="nav" id="nav"></nav>
+    <div class="foot">Cada <b>venta</b>, <b>compra</b> y <b>traslado</b> actualiza el stock de la sucursal y deja registro en el kárdex.</div>
+    <button class="reset" id="reset" title="Restablecer datos de la demo">↺ Restablecer datos</button>
+  </aside>
+  <main>
+    <div class="top">
+      <div><div class="crumb" id="crumb"></div><h1 id="title"></h1></div>
+      <div class="sp"></div>
+      <div class="chip" id="who"></div>
+      <button class="outbtn" id="out">Cerrar sesión</button>
+    </div>
+    <div class="content" id="view"></div>
+  </main>
+</div>
+<div id="toasts"></div>
+
+<script>
+const RAW = {"categorias": [{"idcategorias": 1, "nombre": "Electronica", "descripcion": "Equipos y accesorios electronicos"}, {"idcategorias": 2, "nombre": "Hogar", "descripcion": "Articulos para el hogar"}, {"idcategorias": 3, "nombre": "Ferreteria", "descripcion": "Herramientas y materiales"}, {"idcategorias": 4, "nombre": "Abarrotes", "descripcion": "Alimentos y productos de consumo"}, {"idcategorias": 5, "nombre": "Utiles de oficina", "descripcion": "Papeleria y utiles escolares"}, {"idcategorias": 6, "nombre": "Limpieza", "descripcion": "Productos de limpieza del hogar"}, {"idcategorias": 7, "nombre": "Bebidas", "descripcion": "Gaseosas, aguas y jugos"}, {"idcategorias": 8, "nombre": "Cuidado personal", "descripcion": "Higiene y cuidado personal"}, {"idcategorias": 9, "nombre": "Automotriz", "descripcion": "Accesorios y repuestos de auto"}, {"idcategorias": 10, "nombre": "Jugueteria", "descripcion": "Juguetes y juegos"}], "marcas": [{"idmarca": 1, "nombre": "Samsung", "descripcion": "Electronica de consumo", "activo": true}, {"idmarca": 2, "nombre": "Philips", "descripcion": "Iluminacion y audio", "activo": true}, {"idmarca": 3, "nombre": "Truper", "descripcion": "Herramientas manuales", "activo": true}, {"idmarca": 4, "nombre": "Alicorp", "descripcion": "Alimentos y consumo masivo", "activo": true}, {"idmarca": 5, "nombre": "Faber-Castell", "descripcion": "Utiles de escritura", "activo": true}, {"idmarca": 6, "nombre": "Bosch", "descripcion": "Herramientas electricas", "activo": true}, {"idmarca": 7, "nombre": "Gloria", "descripcion": "Lacteos y derivados", "activo": true}, {"idmarca": 8, "nombre": "Oster", "descripcion": "Electrodomesticos", "activo": true}, {"idmarca": 9, "nombre": "Sapolio", "descripcion": "Limpieza del hogar", "activo": true}, {"idmarca": 10, "nombre": "Inca Kola", "descripcion": "Bebidas gaseosas", "activo": true}], "sucursales": [{"idsucursal": 1, "nombre": "Sucursal Lima Centro", "direccion": "Av. Abancay 123, Lima", "telefono": "01-4231001", "activo": true}, {"idsucursal": 2, "nombre": "Sucursal Miraflores", "direccion": "Av. Larco 456, Miraflores", "telefono": "01-4452002", "activo": true}, {"idsucursal": 3, "nombre": "Sucursal Arequipa", "direccion": "Calle Mercaderes 789, Arequipa", "telefono": "054-203003", "activo": true}, {"idsucursal": 4, "nombre": "Sucursal Surco", "direccion": "Av. Caminos del Inca 1200, Surco", "telefono": "01-4483004", "activo": true}, {"idsucursal": 5, "nombre": "Sucursal San Isidro", "direccion": "Av. Republica de Panama 3500, San Isidro", "telefono": "01-4224005", "activo": true}, {"idsucursal": 6, "nombre": "Sucursal Trujillo", "direccion": "Jr. Pizarro 410, Trujillo", "telefono": "044-245006", "activo": true}, {"idsucursal": 7, "nombre": "Sucursal Cusco", "direccion": "Av. El Sol 250, Cusco", "telefono": "084-236007", "activo": true}, {"idsucursal": 8, "nombre": "Sucursal Piura", "direccion": "Av. Grau 640, Piura", "telefono": "073-327008", "activo": true}, {"idsucursal": 9, "nombre": "Sucursal Callao", "direccion": "Av. Sucre 880, Callao", "telefono": "01-4299009", "activo": true}, {"idsucursal": 10, "nombre": "Sucursal Chiclayo", "direccion": "Calle San Jose 305, Chiclayo", "telefono": "074-231010", "activo": true}], "usuario": [{"idusuario": 1, "idsucursal": 1, "nombre": "Carlos Admin", "correo": "admin@inventrack.pe", "contrasena": "$2a$10$/HnBiarFLqv3C.3WZ2MazexQYn5Ul4tWcF2s6cyE6ZfUq5HXqF.mS", "rol": "Administrador", "acceso": null, "activo": true, "fechacreacion": "2026-09-01T09:00:00"}, {"idusuario": 2, "idsucursal": 1, "nombre": "Lucia Vendedora", "correo": "lucia@inventrack.pe", "contrasena": "$2a$10$/HnBiarFLqv3C.3WZ2MazexQYn5Ul4tWcF2s6cyE6ZfUq5HXqF.mS", "rol": "Vendedor", "acceso": null, "activo": true, "fechacreacion": "2026-09-01T09:10:00"}, {"idusuario": 3, "idsucursal": 2, "nombre": "Mario Vendedor", "correo": "mario@inventrack.pe", "contrasena": "$2a$10$/HnBiarFLqv3C.3WZ2MazexQYn5Ul4tWcF2s6cyE6ZfUq5HXqF.mS", "rol": "Vendedor", "acceso": null, "activo": true, "fechacreacion": "2026-09-01T09:20:00"}, {"idusuario": 4, "idsucursal": 2, "nombre": "Rosa Almacenera", "correo": "rosa@inventrack.pe", "contrasena": "$2a$10$/HnBiarFLqv3C.3WZ2MazexQYn5Ul4tWcF2s6cyE6ZfUq5HXqF.mS", "rol": "Almacen", "acceso": null, "activo": true, "fechacreacion": "2026-09-01T09:30:00"}, {"idusuario": 5, "idsucursal": 3, "nombre": "Jorge Vendedor", "correo": "jorge@inventrack.pe", "contrasena": "$2a$10$/HnBiarFLqv3C.3WZ2MazexQYn5Ul4tWcF2s6cyE6ZfUq5HXqF.mS", "rol": "Vendedor", "acceso": null, "activo": true, "fechacreacion": "2026-09-01T09:40:00"}, {"idusuario": 6, "idsucursal": 3, "nombre": "Pedro Almacenero", "correo": "pedro@inventrack.pe", "contrasena": "$2a$10$/HnBiarFLqv3C.3WZ2MazexQYn5Ul4tWcF2s6cyE6ZfUq5HXqF.mS", "rol": "Almacen", "acceso": null, "activo": true, "fechacreacion": "2026-09-01T09:50:00"}, {"idusuario": 7, "idsucursal": 4, "nombre": "Diana Almacenera", "correo": "diana@inventrack.pe", "contrasena": "$2a$10$/HnBiarFLqv3C.3WZ2MazexQYn5Ul4tWcF2s6cyE6ZfUq5HXqF.mS", "rol": "Almacen", "acceso": null, "activo": true, "fechacreacion": "2026-09-01T10:00:00"}, {"idusuario": 8, "idsucursal": 5, "nombre": "Raul Almacenero", "correo": "raul@inventrack.pe", "contrasena": "$2a$10$/HnBiarFLqv3C.3WZ2MazexQYn5Ul4tWcF2s6cyE6ZfUq5HXqF.mS", "rol": "Almacen", "acceso": null, "activo": true, "fechacreacion": "2026-09-01T10:10:00"}, {"idusuario": 9, "idsucursal": 5, "nombre": "Elena Vendedora", "correo": "elena@inventrack.pe", "contrasena": "$2a$10$/HnBiarFLqv3C.3WZ2MazexQYn5Ul4tWcF2s6cyE6ZfUq5HXqF.mS", "rol": "Vendedor", "acceso": null, "activo": true, "fechacreacion": "2026-09-01T10:20:00"}, {"idusuario": 10, "idsucursal": 2, "nombre": "Hugo Administrador", "correo": "hugo@inventrack.pe", "contrasena": "$2a$10$/HnBiarFLqv3C.3WZ2MazexQYn5Ul4tWcF2s6cyE6ZfUq5HXqF.mS", "rol": "Administrador", "acceso": null, "activo": true, "fechacreacion": "2026-09-01T10:30:00"}], "producto": [{"idproducto": 1, "idcategorias": 1, "idmarca": 1, "codigo": "ELEC-001", "nombre": "Televisor Samsung 43\"", "descripcion": "Smart TV 43 pulgadas", "precioventa": 1299.0, "preciocosto": 950.0, "stockminimo": 5, "activo": true, "fechacreacion": "2026-09-02T10:00:00"}, {"idproducto": 2, "idcategorias": 2, "idmarca": 2, "codigo": "HOG-001", "nombre": "Foco LED Philips 12W", "descripcion": "Luz blanca 12W", "precioventa": 12.5, "preciocosto": 7.0, "stockminimo": 50, "activo": true, "fechacreacion": "2026-09-02T10:05:00"}, {"idproducto": 3, "idcategorias": 3, "idmarca": 3, "codigo": "FER-001", "nombre": "Taladro Truper 1/2\"", "descripcion": "Taladro percutor", "precioventa": 189.9, "preciocosto": 130.0, "stockminimo": 5, "activo": true, "fechacreacion": "2026-09-02T10:10:00"}, {"idproducto": 4, "idcategorias": 4, "idmarca": 4, "codigo": "ABA-001", "nombre": "Aceite Primor 1L", "descripcion": "Aceite vegetal botella 1L", "precioventa": 9.5, "preciocosto": 7.2, "stockminimo": 40, "activo": true, "fechacreacion": "2026-09-02T10:15:00"}, {"idproducto": 5, "idcategorias": 5, "idmarca": 5, "codigo": "UTI-001", "nombre": "Lapices Faber-Castell x12", "descripcion": "Caja de 12 lapices", "precioventa": 18.0, "preciocosto": 11.0, "stockminimo": 20, "activo": true, "fechacreacion": "2026-09-02T10:20:00"}, {"idproducto": 6, "idcategorias": 1, "idmarca": 2, "codigo": "ELEC-002", "nombre": "Parlante Philips Bluetooth", "descripcion": "Parlante portatil", "precioventa": 149.0, "preciocosto": 95.0, "stockminimo": 8, "activo": true, "fechacreacion": "2026-09-02T10:25:00"}, {"idproducto": 7, "idcategorias": 3, "idmarca": 3, "codigo": "FER-002", "nombre": "Martillo Truper", "descripcion": "Martillo de acero 16 oz", "precioventa": 35.0, "preciocosto": 22.0, "stockminimo": 10, "activo": true, "fechacreacion": "2026-09-02T10:30:00"}, {"idproducto": 8, "idcategorias": 4, "idmarca": 4, "codigo": "ABA-002", "nombre": "Fideos Don Vittorio 500g", "descripcion": "Fideos spaghetti 500g", "precioventa": 3.8, "preciocosto": 2.6, "stockminimo": 60, "activo": true, "fechacreacion": "2026-09-02T10:35:00"}, {"idproducto": 9, "idcategorias": 5, "idmarca": 5, "codigo": "UTI-002", "nombre": "Cuaderno A4 cuadriculado", "descripcion": "Cuaderno 100 hojas", "precioventa": 7.5, "preciocosto": 4.2, "stockminimo": 30, "activo": true, "fechacreacion": "2026-09-02T10:40:00"}, {"idproducto": 10, "idcategorias": 2, "idmarca": 2, "codigo": "HOG-002", "nombre": "Enchufe inteligente Philips", "descripcion": "Smart plug WiFi", "precioventa": 45.0, "preciocosto": 28.0, "stockminimo": 10, "activo": true, "fechacreacion": "2026-09-02T10:45:00"}, {"idproducto": 11, "idcategorias": 6, "idmarca": 9, "codigo": "LIM-001", "nombre": "Limpiador Sapolio 1L", "descripcion": "Limpiador multiuso 1L", "precioventa": 6.5, "preciocosto": 4.0, "stockminimo": 30, "activo": true, "fechacreacion": "2026-09-02T10:50:00"}, {"idproducto": 12, "idcategorias": 7, "idmarca": 10, "codigo": "BEB-001", "nombre": "Gaseosa Inca Kola 1.5L", "descripcion": "Gaseosa botella 1.5L", "precioventa": 7.5, "preciocosto": 5.2, "stockminimo": 40, "activo": true, "fechacreacion": "2026-09-02T10:55:00"}, {"idproducto": 13, "idcategorias": 2, "idmarca": 8, "codigo": "HOG-003", "nombre": "Licuadora Oster 600W", "descripcion": "Licuadora 600W vaso de vidrio", "precioventa": 189.0, "preciocosto": 130.0, "stockminimo": 6, "activo": true, "fechacreacion": "2026-09-02T11:00:00"}, {"idproducto": 14, "idcategorias": 4, "idmarca": 7, "codigo": "ABA-003", "nombre": "Leche Gloria evaporada 400g", "descripcion": "Leche evaporada entera 400g", "precioventa": 4.5, "preciocosto": 3.4, "stockminimo": 60, "activo": true, "fechacreacion": "2026-09-02T11:05:00"}, {"idproducto": 15, "idcategorias": 3, "idmarca": 6, "codigo": "FER-003", "nombre": "Taladro Bosch 1/2\"", "descripcion": "Taladro percutor profesional", "precioventa": 259.0, "preciocosto": 180.0, "stockminimo": 5, "activo": true, "fechacreacion": "2026-09-02T11:10:00"}], "inventario": [{"idinventario": 1, "idsucursal": 1, "idproducto": 1, "cantidaddisponible": 8, "ubicacion": "Pasillo A-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 2, "idsucursal": 1, "idproducto": 6, "cantidaddisponible": 5, "ubicacion": "Pasillo A-2", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 3, "idsucursal": 1, "idproducto": 4, "cantidaddisponible": 20, "ubicacion": "Pasillo C-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 4, "idsucursal": 1, "idproducto": 8, "cantidaddisponible": 40, "ubicacion": "Pasillo C-2", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 5, "idsucursal": 2, "idproducto": 3, "cantidaddisponible": 8, "ubicacion": "Pasillo B-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 6, "idsucursal": 2, "idproducto": 7, "cantidaddisponible": 13, "ubicacion": "Pasillo B-2", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 7, "idsucursal": 2, "idproducto": 2, "cantidaddisponible": 36, "ubicacion": "Pasillo D-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 8, "idsucursal": 3, "idproducto": 5, "cantidaddisponible": 20, "ubicacion": "Pasillo E-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 9, "idsucursal": 3, "idproducto": 9, "cantidaddisponible": 40, "ubicacion": "Pasillo E-2", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 10, "idsucursal": 3, "idproducto": 10, "cantidaddisponible": 15, "ubicacion": "Pasillo D-2", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 11, "idsucursal": 1, "idproducto": 11, "cantidaddisponible": 56, "ubicacion": "Pasillo F-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 12, "idsucursal": 1, "idproducto": 12, "cantidaddisponible": 78, "ubicacion": "Pasillo F-2", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 13, "idsucursal": 2, "idproducto": 13, "cantidaddisponible": 9, "ubicacion": "Pasillo G-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 14, "idsucursal": 2, "idproducto": 14, "cantidaddisponible": 64, "ubicacion": "Pasillo G-2", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 15, "idsucursal": 3, "idproducto": 15, "cantidaddisponible": 9, "ubicacion": "Pasillo H-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 16, "idsucursal": 4, "idproducto": 1, "cantidaddisponible": 6, "ubicacion": "Pasillo A-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 17, "idsucursal": 4, "idproducto": 2, "cantidaddisponible": 45, "ubicacion": "Pasillo D-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 18, "idsucursal": 5, "idproducto": 4, "cantidaddisponible": 60, "ubicacion": "Pasillo C-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 19, "idsucursal": 3, "idproducto": 6, "cantidaddisponible": 2, "ubicacion": "Pasillo A-2", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 20, "idsucursal": 1, "idproducto": 3, "cantidaddisponible": 1, "ubicacion": "Pasillo B-1", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 21, "idsucursal": 5, "idproducto": 7, "cantidaddisponible": 4, "ubicacion": "Pasillo B-2", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 22, "idsucursal": 2, "idproducto": 8, "cantidaddisponible": 20, "ubicacion": "Pasillo C-2", "actualizacion": "2026-09-19T12:00:00"}, {"idinventario": 23, "idsucursal": 2, "idproducto": 4, "cantidaddisponible": 10, "ubicacion": "Pasillo C-1", "actualizacion": "2026-09-19T12:00:00"}], "proveedores": [{"idproveedor": 1, "nombre": "Distribuidora Electro Peru SAC", "rfc_nit": "20512345678", "telefono": "01-6001001", "correo": "ventas@electroperu.pe", "direccion": "Av. Industrial 100, Lima", "activo": true}, {"idproveedor": 2, "nombre": "Ferreteria Mayorista Truper", "rfc_nit": "20587654321", "telefono": "01-6002002", "correo": "pedidos@truper.pe", "direccion": "Jr. Comercio 200, Lima", "activo": true}, {"idproveedor": 3, "nombre": "Alimentos y Consumo del Sur SAC", "rfc_nit": "20598765432", "telefono": "054-607003", "correo": "compras@consumosur.pe", "direccion": "Av. Parra 300, Arequipa", "activo": true}, {"idproveedor": 4, "nombre": "Limpieza Total SAC", "rfc_nit": "20511122233", "telefono": "01-6004004", "correo": "ventas@limpiezatotal.pe", "direccion": "Av. Argentina 450, Callao", "activo": true}, {"idproveedor": 5, "nombre": "Bebidas del Peru SAC", "rfc_nit": "20522233344", "telefono": "01-6005005", "correo": "pedidos@bebidasperu.pe", "direccion": "Av. Colonial 780, Lima", "activo": true}, {"idproveedor": 6, "nombre": "Bosch Herramientas Peru SAC", "rfc_nit": "20533344455", "telefono": "01-6006006", "correo": "ventas@boschperu.pe", "direccion": "Av. Republica de Panama 900, Lima", "activo": true}, {"idproveedor": 7, "nombre": "Lacteos Andinos SAC", "rfc_nit": "20544455566", "telefono": "054-608007", "correo": "compras@lacteosandinos.pe", "direccion": "Av. Dolores 120, Arequipa", "activo": true}, {"idproveedor": 8, "nombre": "Electrohogar Oster Peru", "rfc_nit": "20555566677", "telefono": "01-6008008", "correo": "ventas@osterperu.pe", "direccion": "Av. Javier Prado 2100, Lima", "activo": true}, {"idproveedor": 9, "nombre": "Importadora Norte SAC", "rfc_nit": "20566677788", "telefono": "044-609009", "correo": "pedidos@importnorte.pe", "direccion": "Av. America 560, Trujillo", "activo": true}, {"idproveedor": 10, "nombre": "Mayorista Cusco EIRL", "rfc_nit": "20577788899", "telefono": "084-610010", "correo": "ventas@mayoristacusco.pe", "direccion": "Av. La Cultura 310, Cusco", "activo": true}], "producto_proveedor": [{"idproductoproveedor": 1, "idproducto": 1, "idproveedor": 1, "codigoproveedor": "EP-TV43", "preciocompra": 950.0, "activo": true}, {"idproductoproveedor": 2, "idproducto": 6, "idproveedor": 1, "codigoproveedor": "EP-PARL", "preciocompra": 95.0, "activo": true}, {"idproductoproveedor": 3, "idproducto": 10, "idproveedor": 1, "codigoproveedor": "EP-SPLUG", "preciocompra": 28.0, "activo": true}, {"idproductoproveedor": 4, "idproducto": 3, "idproveedor": 2, "codigoproveedor": "TR-TAL12", "preciocompra": 130.0, "activo": true}, {"idproductoproveedor": 5, "idproducto": 7, "idproveedor": 2, "codigoproveedor": "TR-MART", "preciocompra": 22.0, "activo": true}, {"idproductoproveedor": 6, "idproducto": 4, "idproveedor": 3, "codigoproveedor": "CS-ACE1", "preciocompra": 7.2, "activo": true}, {"idproductoproveedor": 7, "idproducto": 8, "idproveedor": 3, "codigoproveedor": "CS-FID5", "preciocompra": 2.6, "activo": true}, {"idproductoproveedor": 8, "idproducto": 9, "idproveedor": 3, "codigoproveedor": "CS-CUA4", "preciocompra": 4.2, "activo": true}, {"idproductoproveedor": 9, "idproducto": 11, "idproveedor": 4, "codigoproveedor": "LT-LIM1", "preciocompra": 4.0, "activo": true}, {"idproductoproveedor": 10, "idproducto": 12, "idproveedor": 5, "codigoproveedor": "BP-INCA15", "preciocompra": 5.2, "activo": true}, {"idproductoproveedor": 11, "idproducto": 15, "idproveedor": 6, "codigoproveedor": "BO-TAL12", "preciocompra": 180.0, "activo": true}, {"idproductoproveedor": 12, "idproducto": 14, "idproveedor": 7, "codigoproveedor": "LA-GLO400", "preciocompra": 3.4, "activo": true}, {"idproductoproveedor": 13, "idproducto": 13, "idproveedor": 8, "codigoproveedor": "OS-LIC600", "preciocompra": 130.0, "activo": true}, {"idproductoproveedor": 14, "idproducto": 1, "idproveedor": 9, "codigoproveedor": "IN-TV43", "preciocompra": 955.0, "activo": true}, {"idproductoproveedor": 15, "idproducto": 4, "idproveedor": 10, "codigoproveedor": "MC-ACE1", "preciocompra": 7.3, "activo": true}], "clientes": [{"idcliente": 1, "nombre": "Ana Torres Quispe", "documento": "45678912", "telefono": "987654321", "correo": "ana.torres@correo.pe", "direccion": "Jr. Union 10, Lima", "fecharegistro": "2026-09-03T11:00:00"}, {"idcliente": 2, "nombre": "Bodega San Martin EIRL", "documento": "20601234567", "telefono": "986543210", "correo": "bodega.sanmartin@correo.pe", "direccion": "Av. Brasil 55, Lima", "fecharegistro": "2026-09-03T11:10:00"}, {"idcliente": 3, "nombre": "Luis Paredes Rojas", "documento": "41237856", "telefono": "985432109", "correo": "luis.paredes@correo.pe", "direccion": "Calle Los Pinos 8, Miraflores", "fecharegistro": "2026-09-03T11:20:00"}, {"idcliente": 4, "nombre": "Marta Flores Huaman", "documento": "47891234", "telefono": "984321098", "correo": "marta.flores@correo.pe", "direccion": "Av. Ejercito 90, Arequipa", "fecharegistro": "2026-09-03T11:30:00"}, {"idcliente": 5, "nombre": "Cliente Mostrador", "documento": "00000000", "telefono": null, "correo": null, "direccion": null, "fecharegistro": "2026-09-03T11:40:00"}, {"idcliente": 6, "nombre": "Carmen Vega Salazar", "documento": "40125678", "telefono": "983210987", "correo": "carmen.vega@correo.pe", "direccion": "Av. Benavides 300, Surco", "fecharegistro": "2026-09-04T09:00:00"}, {"idcliente": 7, "nombre": "Ferreteria El Maestro SAC", "documento": "20611223344", "telefono": "982109876", "correo": "elmaestro@correo.pe", "direccion": "Av. Universitaria 1500, Lima", "fecharegistro": "2026-09-04T09:10:00"}, {"idcliente": 8, "nombre": "Jorge Mendoza Ruiz", "documento": "43219876", "telefono": "981098765", "correo": "jorge.mendoza@correo.pe", "direccion": "Jr. Lampa 220, Lima", "fecharegistro": "2026-09-04T09:20:00"}, {"idcliente": 9, "nombre": "Minimarket Los Olivos SAC", "documento": "20622334455", "telefono": "980987654", "correo": "losolivos@correo.pe", "direccion": "Av. Alfredo Mendiola 800, Los Olivos", "fecharegistro": "2026-09-04T09:30:00"}, {"idcliente": 10, "nombre": "Rosa Castillo Diaz", "documento": "46789012", "telefono": "979876543", "correo": "rosa.castillo@correo.pe", "direccion": "Calle Bolognesi 45, Arequipa", "fecharegistro": "2026-09-04T09:40:00"}], "metodos_pago": [{"idmetodopago": 1, "nombre": "Efectivo", "descripcion": "Pago en efectivo", "activo": true}, {"idmetodopago": 2, "nombre": "Tarjeta", "descripcion": "Tarjeta de debito o credito", "activo": true}, {"idmetodopago": 3, "nombre": "Yape", "descripcion": "Pago con billetera digital", "activo": true}, {"idmetodopago": 4, "nombre": "Transferencia", "descripcion": "Transferencia bancaria", "activo": true}, {"idmetodopago": 5, "nombre": "Plin", "descripcion": "Pago con billetera digital Plin", "activo": true}, {"idmetodopago": 6, "nombre": "Tarjeta de credito", "descripcion": "Pago con tarjeta de credito", "activo": true}, {"idmetodopago": 7, "nombre": "Tarjeta de debito", "descripcion": "Pago con tarjeta de debito", "activo": true}, {"idmetodopago": 8, "nombre": "Cheque", "descripcion": "Pago con cheque de gerencia", "activo": true}, {"idmetodopago": 9, "nombre": "Credito 30 dias", "descripcion": "Venta al credito a 30 dias", "activo": true}, {"idmetodopago": 10, "nombre": "Deposito en cuenta", "descripcion": "Deposito directo en cuenta bancaria", "activo": true}], "ordenes_compra": [{"idcompra": 1, "idproveedor": 1, "idsucursal": 1, "idusuario": 1, "fechacompra": "2026-09-05T10:00:00", "total": 10450.0, "estado": "Recibida", "observacion": "Reposicion de electronica"}, {"idcompra": 2, "idproveedor": 2, "idsucursal": 2, "idusuario": 4, "fechacompra": "2026-09-05T11:00:00", "total": 1740.0, "estado": "Recibida", "observacion": "Reposicion de ferreteria"}, {"idcompra": 3, "idproveedor": 3, "idsucursal": 1, "idusuario": 1, "fechacompra": "2026-09-08T09:00:00", "total": 1240.0, "estado": "Pendiente", "observacion": "Pedido de abarrotes"}, {"idcompra": 4, "idproveedor": 4, "idsucursal": 1, "idusuario": 1, "fechacompra": "2026-09-12T10:00:00", "total": 240.0, "estado": "Recibida", "observacion": "Reposicion de limpieza"}, {"idcompra": 5, "idproveedor": 5, "idsucursal": 1, "idusuario": 1, "fechacompra": "2026-09-12T11:00:00", "total": 416.0, "estado": "Recibida", "observacion": "Reposicion de bebidas"}, {"idcompra": 6, "idproveedor": 6, "idsucursal": 3, "idusuario": 6, "fechacompra": "2026-09-12T12:00:00", "total": 1800.0, "estado": "Recibida", "observacion": "Taladros para Arequipa"}, {"idcompra": 7, "idproveedor": 7, "idsucursal": 1, "idusuario": 1, "fechacompra": "2026-09-14T09:00:00", "total": 340.0, "estado": "Pendiente", "observacion": "Pedido de leche"}, {"idcompra": 8, "idproveedor": 8, "idsucursal": 2, "idusuario": 4, "fechacompra": "2026-09-12T13:00:00", "total": 1300.0, "estado": "Recibida", "observacion": "Licuadoras para Miraflores"}, {"idcompra": 9, "idproveedor": 9, "idsucursal": 4, "idusuario": 7, "fechacompra": "2026-09-15T09:00:00", "total": 4750.0, "estado": "Pendiente", "observacion": "Televisores para Surco"}, {"idcompra": 10, "idproveedor": 10, "idsucursal": 5, "idusuario": 8, "fechacompra": "2026-09-12T14:00:00", "total": 432.0, "estado": "Recibida", "observacion": "Aceite para San Isidro"}], "detalle_compra": [{"iddetallecompra": 1, "idcompra": 1, "idproducto": 1, "cantidad": 10, "preciounitario": 950.0, "subtotal": 9500.0}, {"iddetallecompra": 2, "idcompra": 1, "idproducto": 6, "cantidad": 10, "preciounitario": 95.0, "subtotal": 950.0}, {"iddetallecompra": 3, "idcompra": 2, "idproducto": 3, "cantidad": 10, "preciounitario": 130.0, "subtotal": 1300.0}, {"iddetallecompra": 4, "idcompra": 2, "idproducto": 7, "cantidad": 20, "preciounitario": 22.0, "subtotal": 440.0}, {"iddetallecompra": 5, "idcompra": 3, "idproducto": 4, "cantidad": 100, "preciounitario": 7.2, "subtotal": 720.0}, {"iddetallecompra": 6, "idcompra": 3, "idproducto": 8, "cantidad": 200, "preciounitario": 2.6, "subtotal": 520.0}, {"iddetallecompra": 7, "idcompra": 4, "idproducto": 11, "cantidad": 60, "preciounitario": 4.0, "subtotal": 240.0}, {"iddetallecompra": 8, "idcompra": 5, "idproducto": 12, "cantidad": 80, "preciounitario": 5.2, "subtotal": 416.0}, {"iddetallecompra": 9, "idcompra": 6, "idproducto": 15, "cantidad": 10, "preciounitario": 180.0, "subtotal": 1800.0}, {"iddetallecompra": 10, "idcompra": 7, "idproducto": 14, "cantidad": 100, "preciounitario": 3.4, "subtotal": 340.0}, {"iddetallecompra": 11, "idcompra": 8, "idproducto": 13, "cantidad": 10, "preciounitario": 130.0, "subtotal": 1300.0}, {"iddetallecompra": 12, "idcompra": 9, "idproducto": 1, "cantidad": 5, "preciounitario": 950.0, "subtotal": 4750.0}, {"iddetallecompra": 13, "idcompra": 10, "idproducto": 4, "cantidad": 60, "preciounitario": 7.2, "subtotal": 432.0}], "ventas": [{"idventa": 1, "idcliente": 1, "idsucursal": 1, "idusuario": 2, "idmetodopago": 1, "fechaventa": "2026-09-09T15:00:00", "total": 1597.0, "estado": "Registrada", "observacion": "Venta de electronica"}, {"idventa": 2, "idcliente": 2, "idsucursal": 2, "idusuario": 3, "idmetodopago": 3, "fechaventa": "2026-09-09T16:00:00", "total": 254.9, "estado": "Registrada", "observacion": "Venta de ferreteria"}, {"idventa": 3, "idcliente": 3, "idsucursal": 1, "idusuario": 2, "idmetodopago": 2, "fechaventa": "2026-09-10T10:00:00", "total": 85.5, "estado": "Registrada", "observacion": "Venta de abarrotes"}, {"idventa": 4, "idcliente": 4, "idsucursal": 3, "idusuario": 5, "idmetodopago": 1, "fechaventa": "2026-09-10T11:00:00", "total": 50.0, "estado": "Registrada", "observacion": "Venta de utiles"}, {"idventa": 5, "idcliente": 6, "idsucursal": 1, "idusuario": 2, "idmetodopago": 2, "fechaventa": "2026-09-13T11:00:00", "total": 41.0, "estado": "Registrada", "observacion": "Venta de limpieza y bebidas"}, {"idventa": 6, "idcliente": 7, "idsucursal": 2, "idusuario": 3, "idmetodopago": 1, "fechaventa": "2026-09-13T12:00:00", "total": 239.0, "estado": "Registrada", "observacion": "Venta de hogar"}, {"idventa": 7, "idcliente": 8, "idsucursal": 3, "idusuario": 5, "idmetodopago": 3, "fechaventa": "2026-09-13T15:00:00", "total": 250.0, "estado": "Registrada", "observacion": "Venta de herramientas"}, {"idventa": 8, "idcliente": 9, "idsucursal": 1, "idusuario": 2, "idmetodopago": 4, "fechaventa": "2026-09-14T10:00:00", "total": 1200.0, "estado": "Registrada", "observacion": "Venta de televisor"}, {"idventa": 9, "idcliente": 10, "idsucursal": 2, "idusuario": 3, "idmetodopago": 1, "fechaventa": "2026-09-14T16:00:00", "total": 62.0, "estado": "Registrada", "observacion": "Venta de abarrotes y ferreteria"}, {"idventa": 10, "idcliente": 2, "idsucursal": 1, "idusuario": 2, "idmetodopago": 2, "fechaventa": "2026-09-15T11:00:00", "total": 149.0, "estado": "Registrada", "observacion": "Venta de parlante"}], "detalle_ventas": [{"iddetalleventa": 1, "idventa": 1, "idproducto": 1, "cantidad": 1, "preciounitario": 1299.0, "descuento": 0.0, "subtotal": 1299.0}, {"iddetalleventa": 2, "idventa": 1, "idproducto": 6, "cantidad": 2, "preciounitario": 149.0, "descuento": 0.0, "subtotal": 298.0}, {"iddetalleventa": 3, "idventa": 2, "idproducto": 3, "cantidad": 1, "preciounitario": 189.9, "descuento": 0.0, "subtotal": 189.9}, {"iddetalleventa": 4, "idventa": 2, "idproducto": 7, "cantidad": 2, "preciounitario": 35.0, "descuento": 5.0, "subtotal": 65.0}, {"iddetalleventa": 5, "idventa": 3, "idproducto": 4, "cantidad": 5, "preciounitario": 9.5, "descuento": 0.0, "subtotal": 47.5}, {"iddetalleventa": 6, "idventa": 3, "idproducto": 8, "cantidad": 10, "preciounitario": 3.8, "descuento": 0.0, "subtotal": 38.0}, {"iddetalleventa": 7, "idventa": 4, "idproducto": 5, "cantidad": 3, "preciounitario": 18.0, "descuento": 4.0, "subtotal": 50.0}, {"iddetalleventa": 8, "idventa": 5, "idproducto": 11, "cantidad": 4, "preciounitario": 6.5, "descuento": 0.0, "subtotal": 26.0}, {"iddetalleventa": 9, "idventa": 5, "idproducto": 12, "cantidad": 2, "preciounitario": 7.5, "descuento": 0.0, "subtotal": 15.0}, {"iddetalleventa": 10, "idventa": 6, "idproducto": 13, "cantidad": 1, "preciounitario": 189.0, "descuento": 0.0, "subtotal": 189.0}, {"iddetalleventa": 11, "idventa": 6, "idproducto": 2, "cantidad": 4, "preciounitario": 12.5, "descuento": 0.0, "subtotal": 50.0}, {"iddetalleventa": 12, "idventa": 7, "idproducto": 15, "cantidad": 1, "preciounitario": 259.0, "descuento": 9.0, "subtotal": 250.0}, {"iddetalleventa": 13, "idventa": 8, "idproducto": 1, "cantidad": 1, "preciounitario": 1299.0, "descuento": 99.0, "subtotal": 1200.0}, {"iddetalleventa": 14, "idventa": 9, "idproducto": 14, "cantidad": 6, "preciounitario": 4.5, "descuento": 0.0, "subtotal": 27.0}, {"iddetalleventa": 15, "idventa": 9, "idproducto": 7, "cantidad": 1, "preciounitario": 35.0, "descuento": 0.0, "subtotal": 35.0}, {"iddetalleventa": 16, "idventa": 10, "idproducto": 6, "cantidad": 1, "preciounitario": 149.0, "descuento": 0.0, "subtotal": 149.0}], "traslados": [{"idtraslado": 1, "idsucursalorigen": 1, "idsucursaldestino": 2, "idusuario": 1, "fechasolicitud": "2026-09-11T09:00:00", "fechaenvio": null, "fecharecepcion": null, "estado": "Pendiente", "observacion": "Traslado de televisores a Miraflores"}, {"idtraslado": 2, "idsucursalorigen": 1, "idsucursaldestino": 3, "idusuario": 1, "fechasolicitud": "2026-09-11T10:00:00", "fechaenvio": "2026-09-11T15:00:00", "fecharecepcion": "2026-09-12T16:00:00", "estado": "Recibido", "observacion": "Parlantes para Arequipa"}, {"idtraslado": 3, "idsucursalorigen": 2, "idsucursaldestino": 1, "idusuario": 4, "fechasolicitud": "2026-09-11T11:00:00", "fechaenvio": "2026-09-11T16:00:00", "fecharecepcion": "2026-09-12T10:00:00", "estado": "Recibido", "observacion": "Taladro para Lima Centro"}, {"idtraslado": 4, "idsucursalorigen": 3, "idsucursaldestino": 2, "idusuario": 6, "fechasolicitud": "2026-09-16T09:00:00", "fechaenvio": "2026-09-16T14:00:00", "fecharecepcion": null, "estado": "Enviado", "observacion": "Lapices para Miraflores"}, {"idtraslado": 5, "idsucursalorigen": 1, "idsucursaldestino": 4, "idusuario": 1, "fechasolicitud": "2026-09-16T10:00:00", "fechaenvio": null, "fecharecepcion": null, "estado": "Pendiente", "observacion": "Aceite y limpiador para Surco"}, {"idtraslado": 6, "idsucursalorigen": 2, "idsucursaldestino": 5, "idusuario": 4, "fechasolicitud": "2026-09-12T09:00:00", "fechaenvio": "2026-09-12T14:00:00", "fecharecepcion": "2026-09-13T11:00:00", "estado": "Recibido", "observacion": "Martillos para San Isidro"}, {"idtraslado": 7, "idsucursalorigen": 3, "idsucursaldestino": 1, "idusuario": 6, "fechasolicitud": "2026-09-17T09:00:00", "fechaenvio": null, "fecharecepcion": null, "estado": "Pendiente", "observacion": "Cuadernos para Lima Centro"}, {"idtraslado": 8, "idsucursalorigen": 1, "idsucursaldestino": 2, "idusuario": 1, "fechasolicitud": "2026-09-13T09:00:00", "fechaenvio": "2026-09-13T13:00:00", "fecharecepcion": "2026-09-14T09:00:00", "estado": "Recibido", "observacion": "Fideos y aceite para Miraflores"}, {"idtraslado": 9, "idsucursalorigen": 4, "idsucursaldestino": 1, "idusuario": 7, "fechasolicitud": "2026-09-17T10:00:00", "fechaenvio": "2026-09-17T15:00:00", "fecharecepcion": null, "estado": "Enviado", "observacion": "Focos de Surco a Lima Centro"}, {"idtraslado": 10, "idsucursalorigen": 5, "idsucursaldestino": 3, "idusuario": 8, "fechasolicitud": "2026-09-18T09:00:00", "fechaenvio": null, "fecharecepcion": null, "estado": "Pendiente", "observacion": "Aceite para Arequipa"}], "detalle_traslado": [{"iddetalletraslado": 1, "idtraslado": 1, "idproducto": 1, "cantidad": 2}, {"iddetalletraslado": 2, "idtraslado": 2, "idproducto": 6, "cantidad": 2}, {"iddetalletraslado": 3, "idtraslado": 3, "idproducto": 3, "cantidad": 1}, {"iddetalletraslado": 4, "idtraslado": 4, "idproducto": 5, "cantidad": 5}, {"iddetalletraslado": 5, "idtraslado": 5, "idproducto": 4, "cantidad": 10}, {"iddetalletraslado": 6, "idtraslado": 6, "idproducto": 7, "cantidad": 4}, {"iddetalletraslado": 7, "idtraslado": 7, "idproducto": 9, "cantidad": 10}, {"iddetalletraslado": 8, "idtraslado": 8, "idproducto": 8, "cantidad": 20}, {"iddetalletraslado": 9, "idtraslado": 9, "idproducto": 2, "cantidad": 10}, {"iddetalletraslado": 10, "idtraslado": 10, "idproducto": 4, "cantidad": 5}, {"iddetalletraslado": 11, "idtraslado": 5, "idproducto": 11, "cantidad": 15}, {"iddetalletraslado": 12, "idtraslado": 8, "idproducto": 4, "cantidad": 10}], "movimiento_inventario": [{"idmovimiento": 1, "idproducto": 1, "idusuario": 1, "idsucursal": 1, "iddetallecompra": 1, "iddetalleventa": null, "iddetalletraslado": null, "tipomovimiento": "Entrada", "cantidad": 10, "motivo": "Compra", "fecha": "2026-09-06T10:00:00"}, {"idmovimiento": 2, "idproducto": 6, "idusuario": 1, "idsucursal": 1, "iddetallecompra": 2, "iddetalleventa": null, "iddetalletraslado": null, "tipomovimiento": "Entrada", "cantidad": 10, "motivo": "Compra", "fecha": "2026-09-06T10:00:00"}, {"idmovimiento": 3, "idproducto": 3, "idusuario": 4, "idsucursal": 2, "iddetallecompra": 3, "iddetalleventa": null, "iddetalletraslado": null, "tipomovimiento": "Entrada", "cantidad": 10, "motivo": "Compra", "fecha": "2026-09-06T11:00:00"}, {"idmovimiento": 4, "idproducto": 7, "idusuario": 4, "idsucursal": 2, "iddetallecompra": 4, "iddetalleventa": null, "iddetalletraslado": null, "tipomovimiento": "Entrada", "cantidad": 20, "motivo": "Compra", "fecha": "2026-09-06T11:00:00"}, {"idmovimiento": 5, "idproducto": 1, "idusuario": 2, "idsucursal": 1, "iddetallecompra": null, "iddetalleventa": 1, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 1, "motivo": "Venta", "fecha": "2026-09-09T15:00:00"}, {"idmovimiento": 6, "idproducto": 6, "idusuario": 2, "idsucursal": 1, "iddetallecompra": null, "iddetalleventa": 2, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 2, "motivo": "Venta", "fecha": "2026-09-09T15:00:00"}, {"idmovimiento": 7, "idproducto": 3, "idusuario": 3, "idsucursal": 2, "iddetallecompra": null, "iddetalleventa": 3, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 1, "motivo": "Venta", "fecha": "2026-09-09T16:00:00"}, {"idmovimiento": 8, "idproducto": 7, "idusuario": 3, "idsucursal": 2, "iddetallecompra": null, "iddetalleventa": 4, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 2, "motivo": "Venta", "fecha": "2026-09-09T16:00:00"}, {"idmovimiento": 9, "idproducto": 11, "idusuario": 1, "idsucursal": 1, "iddetallecompra": 7, "iddetalleventa": null, "iddetalletraslado": null, "tipomovimiento": "Entrada", "cantidad": 60, "motivo": "Compra", "fecha": "2026-09-13T10:00:00"}, {"idmovimiento": 10, "idproducto": 12, "idusuario": 1, "idsucursal": 1, "iddetallecompra": 8, "iddetalleventa": null, "iddetalletraslado": null, "tipomovimiento": "Entrada", "cantidad": 80, "motivo": "Compra", "fecha": "2026-09-13T10:30:00"}, {"idmovimiento": 11, "idproducto": 15, "idusuario": 6, "idsucursal": 3, "iddetallecompra": 9, "iddetalleventa": null, "iddetalletraslado": null, "tipomovimiento": "Entrada", "cantidad": 10, "motivo": "Compra", "fecha": "2026-09-13T11:00:00"}, {"idmovimiento": 12, "idproducto": 13, "idusuario": 4, "idsucursal": 2, "iddetallecompra": 11, "iddetalleventa": null, "iddetalletraslado": null, "tipomovimiento": "Entrada", "cantidad": 10, "motivo": "Compra", "fecha": "2026-09-13T11:30:00"}, {"idmovimiento": 13, "idproducto": 4, "idusuario": 8, "idsucursal": 5, "iddetallecompra": 13, "iddetalleventa": null, "iddetalletraslado": null, "tipomovimiento": "Entrada", "cantidad": 60, "motivo": "Compra", "fecha": "2026-09-13T12:00:00"}, {"idmovimiento": 14, "idproducto": 11, "idusuario": 2, "idsucursal": 1, "iddetallecompra": null, "iddetalleventa": 8, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 4, "motivo": "Venta", "fecha": "2026-09-13T11:00:00"}, {"idmovimiento": 15, "idproducto": 12, "idusuario": 2, "idsucursal": 1, "iddetallecompra": null, "iddetalleventa": 9, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 2, "motivo": "Venta", "fecha": "2026-09-13T11:00:00"}, {"idmovimiento": 16, "idproducto": 13, "idusuario": 3, "idsucursal": 2, "iddetallecompra": null, "iddetalleventa": 10, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 1, "motivo": "Venta", "fecha": "2026-09-13T12:00:00"}, {"idmovimiento": 17, "idproducto": 2, "idusuario": 3, "idsucursal": 2, "iddetallecompra": null, "iddetalleventa": 11, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 4, "motivo": "Venta", "fecha": "2026-09-13T12:00:00"}, {"idmovimiento": 18, "idproducto": 15, "idusuario": 5, "idsucursal": 3, "iddetallecompra": null, "iddetalleventa": 12, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 1, "motivo": "Venta", "fecha": "2026-09-13T15:00:00"}, {"idmovimiento": 19, "idproducto": 1, "idusuario": 2, "idsucursal": 1, "iddetallecompra": null, "iddetalleventa": 13, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 1, "motivo": "Venta", "fecha": "2026-09-14T10:00:00"}, {"idmovimiento": 20, "idproducto": 14, "idusuario": 3, "idsucursal": 2, "iddetallecompra": null, "iddetalleventa": 14, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 6, "motivo": "Venta", "fecha": "2026-09-14T16:00:00"}, {"idmovimiento": 21, "idproducto": 7, "idusuario": 3, "idsucursal": 2, "iddetallecompra": null, "iddetalleventa": 15, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 1, "motivo": "Venta", "fecha": "2026-09-14T16:00:00"}, {"idmovimiento": 22, "idproducto": 6, "idusuario": 2, "idsucursal": 1, "iddetallecompra": null, "iddetalleventa": 16, "iddetalletraslado": null, "tipomovimiento": "Salida", "cantidad": 1, "motivo": "Venta", "fecha": "2026-09-15T11:00:00"}, {"idmovimiento": 23, "idproducto": 6, "idusuario": 1, "idsucursal": 1, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 2, "tipomovimiento": "Salida", "cantidad": 2, "motivo": "Traslado", "fecha": "2026-09-11T15:00:00"}, {"idmovimiento": 24, "idproducto": 6, "idusuario": 1, "idsucursal": 3, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 2, "tipomovimiento": "Entrada", "cantidad": 2, "motivo": "Traslado", "fecha": "2026-09-12T16:00:00"}, {"idmovimiento": 25, "idproducto": 3, "idusuario": 4, "idsucursal": 2, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 3, "tipomovimiento": "Salida", "cantidad": 1, "motivo": "Traslado", "fecha": "2026-09-11T16:00:00"}, {"idmovimiento": 26, "idproducto": 3, "idusuario": 4, "idsucursal": 1, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 3, "tipomovimiento": "Entrada", "cantidad": 1, "motivo": "Traslado", "fecha": "2026-09-12T10:00:00"}, {"idmovimiento": 27, "idproducto": 7, "idusuario": 4, "idsucursal": 2, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 6, "tipomovimiento": "Salida", "cantidad": 4, "motivo": "Traslado", "fecha": "2026-09-12T14:00:00"}, {"idmovimiento": 28, "idproducto": 7, "idusuario": 4, "idsucursal": 5, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 6, "tipomovimiento": "Entrada", "cantidad": 4, "motivo": "Traslado", "fecha": "2026-09-13T11:00:00"}, {"idmovimiento": 29, "idproducto": 8, "idusuario": 1, "idsucursal": 1, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 8, "tipomovimiento": "Salida", "cantidad": 20, "motivo": "Traslado", "fecha": "2026-09-13T13:00:00"}, {"idmovimiento": 30, "idproducto": 8, "idusuario": 1, "idsucursal": 2, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 8, "tipomovimiento": "Entrada", "cantidad": 20, "motivo": "Traslado", "fecha": "2026-09-14T09:00:00"}, {"idmovimiento": 31, "idproducto": 4, "idusuario": 1, "idsucursal": 1, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 12, "tipomovimiento": "Salida", "cantidad": 10, "motivo": "Traslado", "fecha": "2026-09-13T13:00:00"}, {"idmovimiento": 32, "idproducto": 4, "idusuario": 1, "idsucursal": 2, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 12, "tipomovimiento": "Entrada", "cantidad": 10, "motivo": "Traslado", "fecha": "2026-09-14T09:00:00"}, {"idmovimiento": 33, "idproducto": 5, "idusuario": 6, "idsucursal": 3, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 4, "tipomovimiento": "Salida", "cantidad": 5, "motivo": "Traslado", "fecha": "2026-09-16T14:00:00"}, {"idmovimiento": 34, "idproducto": 2, "idusuario": 7, "idsucursal": 4, "iddetallecompra": null, "iddetalleventa": null, "iddetalletraslado": 9, "tipomovimiento": "Salida", "cantidad": 10, "motivo": "Traslado", "fecha": "2026-09-17T15:00:00"}]};
+const LOGO_DARK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 40 520 120" role="img" aria-label="InvenTrack"><g><path d="M100 38 L154 69 L100 100 L46 69 Z" fill="#5BA8FF"/><path d="M46 69 L100 100 L100 162 L46 131 Z" fill="#1D6FE8"/><path d="M154 69 L100 100 L100 162 L154 131 Z" fill="#2B4B6B"/><path d="M100 100 L100 162" stroke="#fff" stroke-opacity=".25" stroke-width="2"/><path d="M60 100 L86 115 M60 114 L86 129" stroke="#fff" stroke-opacity=".85" stroke-width="5" stroke-linecap="round"/><path d="M112 142 L126 128 L134 134 L146 112" fill="none" stroke="#14D3B0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,-2)"/><path d="M134 110 L148 108 L146 122" fill="none" stroke="#14D3B0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,-2)"/></g><text x="180" y="120" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="58" letter-spacing="-1.5"><tspan font-weight="700" fill="#FFFFFF">Inven</tspan><tspan font-weight="800" fill="#1D6FE8">Track</tspan></text><text x="183" y="146" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" letter-spacing="3.2" fill="#9FB3C8">CONTROL DE INVENTARIO</text></svg>`;
+const ICON = {
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>',
+ cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6"/></svg>',
+ truck:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11v10H2z"/><path d="M13 9h4l4 4v3h-8"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>',
+ swap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-4-4"/><path d="M20 16H6l4 4"/></svg>',
+ box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
+ chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+ alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.01"/></svg>',
+ arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+ plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+ check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
+ code:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>',
+ edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
+ pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'
+};
+/* ---------- datos ---------- */
+let S;
+const CAT = {1:['#E2EEFF','#1D6FE8','mon'],2:['#DDF7EC','#0E9F6E','bulb'],3:['#FFE9D6','#E8590C','tool'],4:['#FFF1CC','#B7791F','can'],5:['#EBE4FF','#6741D9','pen'],6:['#D8F5FA','#0C8599','spray'],7:['#FFE1EA','#D6336C','bottle'],8:['#EEF2F7','#51657A','box'],9:['#EEF2F7','#51657A','box'],10:['#EEF2F7','#51657A','box']};
+const GLY = {
+ mon:'<rect x="4" y="6" width="24" height="16" rx="2.5"/><path d="M12 28h8M16 22v6"/>',
+ bulb:'<path d="M16 3a8 8 0 0 0-4.5 14.6c.9.7 1.3 1.6 1.3 2.4h6.4c0-.8.4-1.7 1.3-2.4A8 8 0 0 0 16 3z"/><path d="M13 24h6M14 28h4"/>',
+ tool:'<path d="M20 6l6 6-3 3-3-1-9 11a2.2 2.2 0 0 1-3-3l11-9-1-3 2-4z"/>',
+ can:'<path d="M9 8h14v18a2 2 0 0 1-2 2H11a2 2 0 0 1-2-2V8z"/><path d="M9 8l2-4h10l2 4M9 15h14"/>',
+ pen:'<path d="M5 27l2-7L22 5l5 5L12 25l-7 2z"/><path d="M18 9l5 5"/>',
+ spray:'<path d="M11 14h10v12a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2V14z"/><path d="M13 14V8h6v6M19 8l5-2M24 11l2 .5M24 14l2 1"/>',
+ bottle:'<path d="M13 3h6v5l3 4v14a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2V12l3-4V3z"/><path d="M10 17h12"/>',
+ box:'<path d="M28 10L16 4 4 10l12 6 12-6z"/><path d="M4 10v12l12 6 12-6V10M16 16v12"/>'
+};
+function pic(p,cls=''){const c=CAT[p.cat]||CAT[8];return `<div class="pic ${cls}" style="background:${c[0]}"><svg viewBox="0 0 32 32" fill="none" stroke="${c[1]}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${GLY[c[2]]}</svg></div>`}
+/* ---------- sesión y token JWT (prototipo del login) ---------- */
+let SESSION=null;
+const CLAVE_DEMO='ClaveSegura2026*';
+function ME(){return US(SESSION?SESSION.id:2)}
+function b64(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_')}
+function fakeJWT(u){const iat=Math.floor(Date.now()/1000);return b64({alg:'HS256'})+'.'+b64({iss:'inventrack',sub:String(u.id),nombre:u.nombre,iat,exp:iat+7200})+'.firma-de-ejemplo-'+u.id}
+function TOKEN(){return SESSION?SESSION.token:''}
+function init(){
+ const R=RAW; S={};
+ S.cat=Object.fromEntries(R.categorias.map(x=>[x.idcategorias,x.nombre]));
+ S.suc=R.sucursales.map(x=>({id:x.idsucursal,nombre:x.nombre.replace('Sucursal ',''),dir:x.direccion}));
+ S.usr=R.usuario.map(x=>({id:x.idusuario,suc:x.idsucursal,nombre:x.nombre,rol:x.rol}));
+ S.prod=R.producto.map(x=>({id:x.idproducto,cat:x.idcategorias,cod:x.codigo,nombre:x.nombre,pv:+x.precioventa,min:x.stockminimo}));
+ S.inv=R.inventario.map(x=>({id:x.idinventario,suc:x.idsucursal,prod:x.idproducto,qty:x.cantidaddisponible,ubic:x.ubicacion}));
+ S.prv=R.proveedores.map(x=>({id:x.idproveedor,nombre:x.nombre,activo:x.activo}));
+ S.pp=R.producto_proveedor.map(x=>({prv:x.idproveedor,prod:x.idproducto,pc:+x.preciocompra}));
+ S.cli=R.clientes.map(x=>({id:x.idcliente,nombre:x.nombre}));
+ S.mp=R.metodos_pago.map(x=>({id:x.idmetodopago,nombre:x.nombre}));
+ S.oc=R.ordenes_compra.map(x=>({id:x.idcompra,prv:x.idproveedor,suc:x.idsucursal,usr:x.idusuario,fecha:x.fechacompra,total:+x.total,estado:x.estado,obs:x.observacion,det:R.detalle_compra.filter(d=>d.idcompra==x.idcompra).map(d=>({prod:d.idproducto,qty:d.cantidad,pu:+d.preciounitario}))}));
+ S.vt=R.ventas.map(x=>({id:x.idventa,cli:x.idcliente,suc:x.idsucursal,usr:x.idusuario,mp:x.idmetodopago,fecha:x.fechaventa,total:+x.total,estado:x.estado,det:R.detalle_ventas.filter(d=>d.idventa==x.idventa).map(d=>({prod:d.idproducto,qty:d.cantidad,pu:+d.preciounitario,dsc:+d.descuento}))}));
+ S.tr=R.traslados.map(x=>({id:x.idtraslado,o:x.idsucursalorigen,d:x.idsucursaldestino,usr:x.idusuario,fecha:x.fechasolicitud,estado:x.estado,obs:x.observacion,det:R.detalle_traslado.filter(d=>d.idtraslado==x.idtraslado).map(d=>({prod:d.idproducto,qty:d.cantidad}))}));
+ S.mv=R.movimiento_inventario.map(x=>({id:x.idmovimiento,prod:x.idproducto,usr:x.idusuario,suc:x.idsucursal,tipo:x.tipomovimiento,qty:x.cantidad,motivo:x.motivo,fecha:x.fecha}));
+ S.cart=[{prod:1,qty:1,dsc:0},{prod:11,qty:4,dsc:2}];
+ S.vCli=1;S.vMp=1;S.vObs='Venta de mostrador';S.vSuc=1;
+ S.cOrd={prv:1,suc:2,obs:'Reposición de electrónica',lines:[{prod:1,qty:5,pu:950},{prod:6,qty:10,pu:95}]};S.cFilter='Todas';
+ S.tNew={o:1,d:2,obs:'Televisores para Miraflores',lines:[{prod:1,qty:2},{prod:6,qty:1}]};
+ S.iSuc=1;S.iLow=false;S.iEdit=null;
+ S.kProd=1;S.kSuc=1;S.rDesde='2026-09-01';S.rHasta='2026-09-30';S.rSuc=0;
+ S.alertV=null;S.alertC=null;S.alertT=null;
+}
+const $=s=>document.querySelector(s);
+const money=n=>'S/ '+Number(n).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
+const P=id=>S.prod.find(p=>p.id==id), SU=id=>S.suc.find(s=>s.id==id), US=id=>S.usr.find(u=>u.id==id);
+const inv=(suc,prod)=>S.inv.find(i=>i.suc==suc&&i.prod==prod);
+const stock=(suc,prod)=>{const i=inv(suc,prod);return i?i.qty:0};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const now=()=>new Date().toISOString().slice(0,19);
+function toast(code,title,msg,ok=true){const t=document.createElement('div');t.className='toast';t.innerHTML=`<div class="code ${ok?'s':'e'}">${code}</div><div><b>${esc(title)}</b><span>${esc(msg)}</span></div>`;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),5200)}
+function addMov(prod,usr,suc,tipo,qty,motivo){S.mv.push({id:S.mv.length+1,prod,usr,suc,tipo,qty,motivo,fecha:now()})}
+function addStock(suc,prod,q){let i=inv(suc,prod);if(!i){i={id:S.inv.length+1,suc,prod,qty:0,ubic:'Por asignar'};S.inv.push(i)}i.qty+=q}
+function stBadge(q,min){return q<=min?`<span class="tag t-bad"><span class="dot"></span>Bajo mínimo</span>`:q<=min*1.5?`<span class="tag t-warn"><span class="dot"></span>Por agotarse</span>`:`<span class="tag t-ok"><span class="dot"></span>Disponible</span>`}
+function jsonBox(o){return `<details class="json"><summary>${ICON.code.replace('<svg','<svg width="16" height="16"')} Ver JSON que se envía al servicio REST</summary><div class="mono" style="font-size:11.5px;color:#7F97B1;margin:8px 0 0">Header: Authorization: Bearer &lt;token de la sesión&gt;</div><pre class="mono">${esc(JSON.stringify(o,null,2))}</pre></details>`}
+
+/* ---------- navegación ---------- */
+const VIEWS=[
+ {id:'inicio',n:'Panel del negocio',ic:'home',crumb:'Visión general',actor:1},
+ {id:'hu01',n:'Vender',ic:'cart',tag:'HU01',crumb:'HU01 · Salida de stock por venta',actor:2},
+ {id:'hu02',n:'Reponer mercadería',ic:'truck',tag:'HU02',crumb:'HU02 · Entrada de stock por compra',actor:4},
+ {id:'hu03',n:'Trasladar',ic:'swap',tag:'HU03',crumb:'HU03 · Movimiento entre sucursales',actor:4},
+ {id:'hu04',n:'Inventario y alertas',ic:'alert',tag:'HU04',crumb:'HU04 · Control de stock',actor:1},
+ {id:'hu05',n:'Kárdex y ventas',ic:'chart',tag:'HU05',crumb:'HU05 · Trazabilidad',actor:1}
+];
+function route(){const id=(location.hash||'#inicio').slice(1);return VIEWS.find(v=>v.id==id)||VIEWS[0]}
+function shell(){
+ $('#logo').innerHTML=LOGO_DARK;
+ $('#nav').innerHTML=VIEWS.map(v=>`<a href="#${v.id}" class="${route().id==v.id?'on':''}">${ICON[v.ic]}<span>${v.n}</span>${v.tag?`<small>${v.tag}</small>`:''}</a>`).join('');
+ const v=route(),u=ME(),s=SU(u.suc);
+ $('#crumb').textContent=v.crumb.toUpperCase();$('#title').textContent=v.n;
+ $('#who').innerHTML=`<span class="av">${u.nombre[0]}</span><span>${u.nombre}<br><span class="role">${u.rol} · ${s.nombre} · <span class="mono">idUsuario ${u.id}</span></span></span>`;
+}
+function loginView(){
+ const us=S.usr;
+ $('#login').innerHTML=`<div class="brand"><div id="lg">${LOGO_DARK}</div>
+  <span class="pill">${ICON.check.replace('<svg','<svg width="14" height="14"')} Acceso protegido con token JWT</span>
+  <h2>Controla el stock de cada sucursal, en tiempo real.</h2>
+  <p>Cada <b>venta</b>, <b>compra</b> y <b>traslado</b> actualiza el stock y deja registro en el kárdex. Inicia sesión para usar el sistema.</p></div>
+ <div class="box"><div class="lc"><h1>Iniciar sesión</h1><div class="sub">Ingresa con tu correo y contraseña. El servicio devuelve un token que se envía en cada petición.</div>
+  <div class="err" id="lerr"></div>
+  <div class="fld"><label>Correo <i>correo</i></label><input type="email" id="lcorreo" value="admin@inventrack.pe" autocomplete="username"></div>
+  <div class="fld"><label>Contraseña <i>contrasena</i></label><input type="password" id="lclave" value="${CLAVE_DEMO}" autocomplete="current-password"></div>
+  <button class="btn" id="lgo">Ingresar ${ICON.arrow.replace('<svg','<svg width="16" height="16"')}</button>
+  <div class="demo">Usuarios de prueba (clave <span class="mono">${CLAVE_DEMO}</span>):<br>${us.map(u=>`<button data-c="${esc(RAW.usuario.find(x=>x.idusuario==u.id).correo)}">${esc(u.nombre)} · ${esc(u.rol)}</button>`).join('')}</div>
+  <details class="json" style="margin-top:16px"><summary>${ICON.code.replace('<svg','<svg width="16" height="16"')} Ver petición y respuesta de POST /auth/login</summary><pre class="mono" id="ljson"></pre></details>
+ </div></div>`;
+ const upd=()=>{const c=$('#lcorreo').value,u=RAW.usuario.find(x=>x.correo==c);const us=u&&S.usr.find(x=>x.id==u.idusuario);
+  $('#ljson').textContent='POST /auth/login\n'+JSON.stringify({correo:c,contrasena:'••••••••'},null,2)+'\n\n200 OK\n'+JSON.stringify(us?{idUsuario:us.id,bearer:'Bearer',nombreCompleto:us.nombre,token:'<token JWT>'}:{mensaje:'Credenciales incorrectas'},null,2)};
+ upd();$('#lcorreo').addEventListener('input',upd);
+ document.querySelectorAll('.demo button').forEach(b=>b.onclick=()=>{$('#lcorreo').value=b.dataset.c;$('#lclave').value=CLAVE_DEMO;upd()});
+ const go=()=>{const c=$('#lcorreo').value.trim(),p=$('#lclave').value,ru=RAW.usuario.find(x=>x.correo==c),e=$('#lerr');
+  if(!ru||p!==CLAVE_DEMO){e.textContent='401 · Credenciales incorrectas';e.classList.add('on');return}
+  const u=S.usr.find(x=>x.id==ru.idusuario);SESSION={id:u.id,token:fakeJWT(u)};try{sessionStorage.setItem('mvpSesion',String(u.id))}catch(_){}
+  document.body.classList.remove('anon');location.hash='#inicio';render();window.scrollTo(0,0);toast('200','Sesión iniciada','Bienvenido, '+u.nombre+'. Token JWT recibido.')};
+ $('#lgo').onclick=go;$('#lclave').addEventListener('keydown',e=>{if(e.key=='Enter')go()});
+}
+function salir(){SESSION=null;try{sessionStorage.removeItem('mvpSesion')}catch(_){}document.body.classList.add('anon');loginView()}
+function render(){if(!SESSION){document.body.classList.add('anon');return loginView()}shell();const v=route();$('#view').innerHTML=({inicio,hu01,hu02,hu03,hu04,hu05})[v.id]();bind()}
+
+/* ---------- INICIO ---------- */
+function flowSVG(){
+ const node=(x,y,w,h,c,bg,title,sub)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="${bg}" stroke="${c}" stroke-width="1.5"/><text x="${x+w/2}" y="${y+h/2-3}" text-anchor="middle" fill="${c}" font-size="15" font-weight="800" letter-spacing=".5">${title}</text><text x="${x+w/2}" y="${y+h/2+17}" text-anchor="middle" fill="#C5D6E8" font-size="11.5" font-weight="500">${sub}</text>`;
+ const pill=(cx,cy,w,txt,c)=>`<rect x="${cx-w/2}" y="${cy-13}" width="${w}" height="26" rx="13" fill="#0E2A47" stroke="${c}" stroke-width="1.5"/><text x="${cx}" y="${cy+4.5}" text-anchor="middle" fill="${c}" font-size="12.5" font-weight="800">${txt}</text>`;
+ return `<svg class="flow" viewBox="0 0 600 330" fill="none">
+<defs>
+ <marker id="aT" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M1 1L11 6L1 11z" fill="#14D3B0"/></marker>
+ <marker id="aP" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M1 1L11 6L1 11z" fill="#FF8FB1"/></marker>
+ <marker id="aB" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M1 1L11 6L1 11z" fill="#5BA8FF"/></marker>
+ <marker id="aB2" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="2" refY="6" orient="auto"><path d="M11 1L1 6L11 11z" fill="#5BA8FF"/></marker>
+</defs>
+<rect x="190" y="6" width="220" height="28" rx="14" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.22)"/>
+<text x="300" y="25" text-anchor="middle" fill="#C5D6E8" font-size="12" font-weight="600">Todo movimiento queda en el KÁRDEX</text>
+<path d="M300 34V92" stroke="rgba(255,255,255,.28)" stroke-width="1.5" stroke-dasharray="4 4"/>
+${node(8,112,142,86,'#14D3B0','rgba(20,211,176,.12)','COMPRA','Proveedor → almacén')}
+${node(450,112,142,86,'#FF8FB1','rgba(255,143,177,.12)','VENTA','Mostrador → cliente')}
+<rect x="230" y="92" width="140" height="146" rx="18" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+<g transform="translate(272 104) scale(.5)"><path d="M54 0L108 31L54 62L0 31Z" fill="#5BA8FF"/><path d="M0 31L54 62V124L0 93Z" fill="#1D6FE8"/><path d="M108 31L54 62V124L108 93Z" fill="#2B4B6B"/></g>
+<text x="300" y="203" text-anchor="middle" fill="#fff" font-size="16" font-weight="800" letter-spacing="1">STOCK</text>
+<text x="300" y="222" text-anchor="middle" fill="#9FB3C8" font-size="11.5" font-weight="500">de cada sucursal</text>
+<path d="M150 155H228" stroke="#14D3B0" stroke-width="2.6" marker-end="url(#aT)"/>
+<path d="M370 155H448" stroke="#FF8FB1" stroke-width="2.6" marker-end="url(#aP)"/>
+${pill(190,128,70,'+ stock','#14D3B0')}${pill(410,128,70,'− stock','#FF8FB1')}
+<path d="M300 240V272" stroke="#5BA8FF" stroke-width="2.6" marker-start="url(#aB2)" marker-end="url(#aB)"/>
+${node(230,274,140,50,'#5BA8FF','rgba(91,168,255,.14)','TRASLADO','Sucursal A ⇄ Sucursal B').replace('y="'+(274+25-3)+'"','y="'+(274+21)+'"').replace('y="'+(274+25+17)+'"','y="'+(274+39)+'"')}
+</svg>`}
+function inicio(){
+ const low=S.inv.filter(i=>i.qty<=P(i.prod).min).length;
+ const vh=S.vt.filter(v=>v.estado=='Registrada').reduce((a,v)=>a+v.total,0);
+ const pend=S.oc.filter(o=>o.estado=='Pendiente').length, trn=S.tr.filter(t=>t.estado!='Recibido').length;
+ const recent=S.mv.slice(-6).reverse();
+ return `<div class="hero"><div><span class="pill">CONTROL DE INVENTARIO MULTISUCURSAL</span><h2>Sabe qué tiene, dónde está y qué debe reponer.</h2><p>InvenTrack actualiza el stock de cada sucursal al instante con cada venta, compra y traslado, y deja registro de quién hizo cada movimiento.</p><div class="row wrap"><a class="btn" href="#hu01" style="text-decoration:none">Registrar una venta ${ICON.arrow}</a><a class="btn ghost" href="#hu04" style="text-decoration:none">Ver alertas de stock</a></div></div>${flowSVG()}</div>
+ <div class="grid g4" style="margin-top:18px">
+  <div class="card kpi"><div class="ic" style="background:var(--infobg);color:var(--blue)">${ICON.chart}</div><div><b>${money(vh)}</b><span>Ventas registradas</span></div></div>
+  <div class="card kpi"><div class="ic" style="background:var(--badbg);color:var(--bad)">${ICON.alert}</div><div><b>${low}</b><span>Productos bajo el mínimo</span></div></div>
+  <div class="card kpi"><div class="ic" style="background:var(--warnbg);color:var(--warn)">${ICON.truck}</div><div><b>${pend}</b><span>Órdenes de compra pendientes</span></div></div>
+  <div class="card kpi"><div class="ic" style="background:var(--okbg);color:var(--ok)">${ICON.swap}</div><div><b>${trn}</b><span>Traslados en curso</span></div></div>
+ </div>
+ <h2 style="margin:26px 0 12px;font-size:17px">Los 5 flujos del negocio</h2>
+ <div class="grid g3" style="grid-template-columns:repeat(5,1fr)">
+  ${[['HU01','Vender','Salida de stock','cart','hu01','El vendedor registra la venta y el stock baja.'],['HU02','Reponer','Entrada de stock','truck','hu02','Se pide al proveedor y, al llegar, el stock sube.'],['HU03','Trasladar','Entre sucursales','swap','hu03','Se mueve stock de un local a otro.'],['HU04','Controlar','Alertas de reposición','alert','hu04','Qué productos están por debajo del mínimo.'],['HU05','Rastrear','Kárdex y ventas','chart','hu05','Qué pasó con cada producto y cuánto se vendió.']].map(x=>`<a class="card hucard" href="#${x[4]}"><div class="ic">${ICON[x[3]]}</div><span class="n">${x[0]}</span><h3>${x[1]}</h3><p><b style="color:var(--ink)">${x[2]}.</b> ${x[5]}</p></a>`).join('')}
+ </div>
+ <div class="card" style="margin-top:18px"><h2>Actividad reciente</h2><div class="sub">Últimos movimientos de stock en todas las sucursales</div>
+ <table><tr><th>Producto</th><th>Sucursal</th><th>Movimiento</th><th class="num">Cantidad</th><th>Motivo</th><th>Registrado por</th></tr>
+ ${recent.map(m=>`<tr><td><div class="pn">${pic(P(m.prod))}<b>${P(m.prod).nombre}</b></div></td><td>${SU(m.suc).nombre}</td><td><span class="tag ${m.tipo=='Entrada'?'t-ok':'t-bad'}">${m.tipo=='Entrada'?'↑':'↓'} ${m.tipo}</span></td><td class="num"><b>${m.qty}</b></td><td>${m.motivo}</td><td>${US(m.usr).nombre}</td></tr>`).join('')}</table></div>`;
+}
+
+/* ---------- HU01 ---------- */
+function cartTotal(){return S.cart.reduce((a,l)=>a+l.qty*P(l.prod).pv-l.dsc,0)}
+function ventaJSON(){const u=ME();return{idCliente:+S.vCli,idSucursal:S.vSuc,idMetodoPago:+S.vMp,idUsuario:u.id,observacion:S.vObs,detalle:S.cart.map(l=>({idProducto:l.prod,cantidad:l.qty,precioUnitario:P(l.prod).pv,descuento:l.dsc}))}}
+function hu01(){
+ const items=S.inv.filter(i=>i.suc==S.vSuc).map(i=>({i,p:P(i.prod)}));
+ const recent=S.vt.filter(v=>v.suc==S.vSuc).slice(-5).reverse();
+ return `<div class="grid g2"><div class="card"><h2>Catálogo de la sucursal ${SU(S.vSuc).nombre}</h2><div class="sub">Productos con su stock disponible. Toca <b>Agregar</b> para sumarlos a la venta.</div>
+ <div class="pgrid">${items.map(({i,p})=>`<div class="pc">${pic(p)}<b>${esc(p.nombre)}</b><span class="pr">${money(p.pv)}</span><div class="st"><span style="color:var(--mut)">Stock: <b style="color:var(--ink)">${i.qty}</b></span>${stBadge(i.qty,p.min)}</div><button class="btn sm ghost" data-act="v-add" data-p="${p.id}" style="justify-content:center;width:100%">${ICON.plus} Agregar</button></div>`).join('')}</div></div>
+ <div class="card" style="align-self:start"><h2>Nueva venta</h2><div class="sub">${ME().rol}: ${ME().nombre} · <span class="mono">idUsuario ${ME().id}</span></div>
+ <div class="row"><div class="fld sp1"><label>Cliente <i>idCliente</i></label><select data-bind="vCli">${S.cli.map(c=>`<option value="${c.id}" ${c.id==S.vCli?'selected':''}>${esc(c.nombre)}</option>`).join('')}</select></div><div class="fld sp1"><label>Método de pago <i>idMetodoPago</i></label><select data-bind="vMp">${S.mp.map(c=>`<option value="${c.id}" ${c.id==S.vMp?'selected':''}>${esc(c.nombre)}</option>`).join('')}</select></div></div>
+ <div class="fld"><label>Observación <i>observacion</i></label><input type="text" data-bind="vObs" value="${esc(S.vObs)}"></div>
+ <label>Detalle de la venta <i>detalle[]</i></label>
+ <div class="lh"><span>Producto</span><span style="text-align:right">Cant.</span><span style="text-align:right">Precio</span><span style="text-align:right">Dscto.</span><span></span></div>
+ ${S.cart.length?S.cart.map((l,k)=>`<div class="line"><div class="pn">${pic(P(l.prod))}<div><b style="font-size:12.5px">${esc(P(l.prod).nombre)}</b><span>Stock ${stock(S.vSuc,l.prod)}</span></div></div><input type="number" min="1" value="${l.qty}" data-line="${k}" data-f="qty"><span style="text-align:right;font-weight:700">${money(P(l.prod).pv)}</span><input type="number" min="0" step="0.5" value="${l.dsc}" data-line="${k}" data-f="dsc"><button class="x" data-act="v-del" data-k="${k}">×</button></div>`).join(''):'<div class="sub" style="padding:14px 0">Agrega productos desde el catálogo.</div>'}
+ <div class="total"><span style="color:var(--mut);font-weight:600">Total de la venta</span><b>${money(cartTotal())}</b></div>
+ ${S.alertV?`<div class="alert ${S.alertV.ok?'ok':'bad'}">${S.alertV.t}</div>`:''}
+ <div class="row"><button class="btn ok sp1" data-act="v-reg" style="justify-content:center">${ICON.check} Registrar venta</button></div>
+ ${jsonBox(ventaJSON())}</div></div>
+ <div class="card" style="margin-top:18px"><h2>Ventas recientes de la sucursal</h2><div class="sub">Si hubo un error, se anula la venta y el stock regresa a la sucursal.</div>
+ <table><tr><th>N°</th><th>Cliente</th><th>Método</th><th class="num">Total</th><th>Estado</th><th></th></tr>${recent.map(v=>`<tr><td class="mono">#${v.id}</td><td>${esc(S.cli.find(c=>c.id==v.cli).nombre)}</td><td>${S.mp.find(m=>m.id==v.mp).nombre}</td><td class="num"><b>${money(v.total)}</b></td><td><span class="tag ${v.estado=='Registrada'?'t-ok':'t-mut'}">${v.estado}</span></td><td class="num"><button class="btn sm bad" data-act="v-anu" data-id="${v.id}">Anular venta</button></td></tr>`).join('')}</table></div>`;
+}
+function vReg(){
+ if(!S.cart.length){S.alertV={ok:false,t:'Agrega al menos un producto.'};return render()}
+ for(const l of S.cart){const q=stock(S.vSuc,l.prod);if(l.qty>q){const m=`Stock insuficiente para el producto ${l.prod}. Disponible: ${q}`;S.alertV={ok:false,t:'<b>400 Bad Request</b> · '+m};toast('400','Venta rechazada',m,false);return render()}}
+ const id=Math.max(...S.vt.map(v=>v.id))+1,total=cartTotal();
+ S.vt.push({id,cli:+S.vCli,suc:S.vSuc,usr:ME().id,mp:+S.vMp,fecha:now(),total,estado:'Registrada',det:S.cart.map(l=>({prod:l.prod,qty:l.qty,pu:P(l.prod).pv,dsc:l.dsc}))});
+ S.cart.forEach(l=>{addStock(S.vSuc,l.prod,-l.qty);addMov(l.prod,ME().id,S.vSuc,'Salida',l.qty,'Venta')});
+ S.alertV={ok:true,t:`<b>201 Created</b> · Venta #${id} registrada por ${money(total)}. El stock bajó en la sucursal.`};
+ toast('201','Venta registrada',`idVenta ${id} · total ${money(total)}`);S.cart=[];render();
+}
+function vAnu(id){
+ const v=S.vt.find(x=>x.id==id);
+ if(v.estado=='Anulada'){toast('409','Conflict','La venta ya está anulada',false);return}
+ v.estado='Anulada';v.det.forEach(d=>{addStock(v.suc,d.prod,d.qty);addMov(d.prod,v.usr,v.suc,'Entrada',d.qty,'Anulación Venta')});
+ toast('200','Venta anulada y stock reincorporado',`Venta #${id}`);render();
+}
+
+/* ---------- HU02 ---------- */
+function ocJSON(){const o=S.cOrd;return{idProveedor:+o.prv,idSucursal:+o.suc,idUsuario:ME().id,observacion:o.obs,detalle:o.lines.map(l=>({idProducto:l.prod,cantidad:l.qty,precioUnitario:l.pu}))}}
+function hu02(){
+ const o=S.cOrd,provProds=S.pp.filter(x=>x.prv==o.prv);
+ const list=S.oc.filter(x=>S.cFilter=='Todas'||x.estado==S.cFilter).slice().sort((x,y)=>(x.estado=='Pendiente'?0:1)-(y.estado=='Pendiente'?0:1)||y.id-x.id).slice(0,8);
+ const tot=o.lines.reduce((a,l)=>a+l.qty*l.pu,0);
+ return `<div class="grid g2b"><div class="card"><h2>Nueva orden de compra</h2><div class="sub">Pedido a un proveedor. El stock sube cuando la mercadería llega y se confirma la recepción.</div>
+ <div class="row"><div class="fld sp1"><label>Proveedor <i>idProveedor</i></label><select data-bind="cOrd.prv">${S.prv.map(p=>`<option value="${p.id}" ${p.id==o.prv?'selected':''} ${p.activo?'':'disabled'}>${esc(p.nombre)}</option>`).join('')}</select></div>
+ <div class="fld sp1"><label>Sucursal destino <i>idSucursal</i></label><select data-bind="cOrd.suc">${S.suc.map(s=>`<option value="${s.id}" ${s.id==o.suc?'selected':''}>${s.nombre}</option>`).join('')}</select></div></div>
+ <div class="fld"><label>Observación <i>observacion</i></label><input type="text" data-bind="cOrd.obs" value="${esc(o.obs)}"></div>
+ <label>Productos que vende este proveedor</label>
+ <div class="row wrap" style="margin-bottom:12px">${provProds.length?provProds.map(x=>`<button class="btn sm ghost" data-act="c-add" data-p="${x.prod}" data-pc="${x.pc}">${ICON.plus} ${esc(P(x.prod).nombre)} · ${money(x.pc)}</button>`).join(''):'<span class="sub">Este proveedor no tiene productos asignados.</span>'}</div>
+ <label>Detalle del pedido <i>detalle[]</i></label>
+ <div class="lh l4"><span>Producto</span><span style="text-align:right">Cant.</span><span style="text-align:right">Precio</span><span></span></div>
+ ${o.lines.map((l,k)=>`<div class="line l4"><div class="pn">${pic(P(l.prod))}<b style="font-size:12.5px">${esc(P(l.prod).nombre)}</b></div><input type="number" min="1" value="${l.qty}" data-cline="${k}"><span style="text-align:right;font-weight:700">${money(l.pu)}</span><button class="x" data-act="c-del" data-k="${k}">×</button></div>`).join('')||'<div class="sub" style="padding:12px 0">Agrega productos del proveedor.</div>'}
+ <div class="total"><span style="color:var(--mut);font-weight:600">Total de la orden</span><b>${money(tot)}</b></div>
+ ${S.alertC?`<div class="alert ${S.alertC.ok?'ok':'bad'}">${S.alertC.t}</div>`:''}
+ <button class="btn ok" data-act="c-reg" style="width:100%;justify-content:center">${ICON.check} Registrar orden de compra</button>${jsonBox(ocJSON())}</div>
+ <div class="card" style="align-self:start"><div class="row"><div class="sp1"><h2>Órdenes de compra</h2><div class="sub" style="margin:0">Confirma la recepción cuando llega la mercadería.</div></div><div class="seg">${['Todas','Pendiente','Recibida'].map(f=>`<button class="${S.cFilter==f?'on':''}" data-act="c-f" data-f="${f}">${f}</button>`).join('')}</div></div>
+ <table style="margin-top:8px"><tr><th>N°</th><th>Proveedor</th><th>Destino</th><th class="num">Total</th><th>Estado</th><th></th></tr>${list.map(x=>`<tr><td class="mono">#${x.id}</td><td style="font-size:12.5px">${esc(S.prv.find(p=>p.id==x.prv).nombre)}</td><td>${SU(x.suc).nombre}</td><td class="num"><b>${money(x.total)}</b></td><td><span class="tag ${x.estado=='Pendiente'?'t-warn':'t-ok'}">${x.estado}</span></td><td class="num">${x.estado=='Pendiente'?`<button class="btn sm ok" data-act="c-rec" data-id="${x.id}">Confirmar recepción</button>`:`<button class="btn sm ghost" data-act="c-rec" data-id="${x.id}">Reintentar</button>`}</td></tr>`).join('')}</table></div></div>`;
+}
+function cReg(){
+ const o=S.cOrd,prv=S.prv.find(p=>p.id==o.prv);
+ if(!prv.activo){const m='El proveedor especificado no se encuentra habilitado';S.alertC={ok:false,t:'<b>400 Bad Request</b> · '+m};toast('400','Orden rechazada',m,false);return render()}
+ if(!o.lines.length){S.alertC={ok:false,t:'Agrega al menos un producto.'};return render()}
+ const id=Math.max(...S.oc.map(x=>x.id))+1,total=o.lines.reduce((a,l)=>a+l.qty*l.pu,0);
+ S.oc.push({id,prv:+o.prv,suc:+o.suc,usr:ME().id,fecha:now(),total,estado:'Pendiente',obs:o.obs,det:o.lines.map(l=>({prod:l.prod,qty:l.qty,pu:l.pu}))});
+ S.alertC={ok:true,t:`<b>201 Created</b> · Orden #${id} en estado Pendiente. El stock aún no cambia.`};toast('201','Orden registrada',`idCompra ${id} · ${money(total)} · Pendiente`);render();
+}
+function cRec(id){
+ const x=S.oc.find(o=>o.id==id);
+ if(x.estado=='Recibida'){toast('409','Conflict','La orden ya ha sido recibida previamente',false);return}
+ x.estado='Recibida';x.det.forEach(d=>{addStock(x.suc,d.prod,d.qty);addMov(d.prod,ME().id,x.suc,'Entrada',d.qty,'Compra')});
+ toast('200','Mercadería recibida con éxito',`Orden #${id} · el stock de ${SU(x.suc).nombre} aumentó`);render();
+}
+
+/* ---------- HU03 ---------- */
+function trJSON(){const t=S.tNew;return{idSucursalOrigen:+t.o,idSucursalDestino:+t.d,idUsuario:ME().id,observacion:t.obs,detalle:t.lines.map(l=>({idProducto:l.prod,cantidad:l.qty}))}}
+function stepper(e){let i=['Pendiente','Enviado','Recibido'].indexOf(e);if(e=='Recibido')i=3;const L=['Solicitado','Enviado','Recibido'];return `<div class="steps">${L.map((l,k)=>`<div class="s ${k<i?'d':k==i?'n':''}"><span class="c">${k<i?'✓':k+1}</span>${l}</div>${k<2?`<span class="bar ${k<i?'d':''}"></span>`:''}`).join('')}</div>`}
+function hu03(){
+ const t=S.tNew,avail=S.inv.filter(i=>i.suc==t.o).map(i=>P(i.prod));
+ return `<div class="grid g2b"><div class="card"><h2>Nuevo traslado</h2><div class="sub">Mueve mercadería de una sucursal a otra sin comprar de más.</div>
+ <div class="row"><div class="fld sp1"><label>Sucursal origen <i>idSucursalOrigen</i></label><select data-bind="tNew.o">${S.suc.map(s=>`<option value="${s.id}" ${s.id==t.o?'selected':''}>${s.nombre}</option>`).join('')}</select></div>
+ <div style="padding-top:14px;color:var(--blue)"><span style="display:block;width:22px">${ICON.arrow}</span></div>
+ <div class="fld sp1"><label>Sucursal destino <i>idSucursalDestino</i></label><select data-bind="tNew.d">${S.suc.map(s=>`<option value="${s.id}" ${s.id==t.d?'selected':''}>${s.nombre}</option>`).join('')}</select></div></div>
+ <div class="fld"><label>Observación <i>observacion</i></label><input type="text" data-bind="tNew.obs" value="${esc(t.obs)}"></div>
+ <label>Productos disponibles en el origen</label>
+ <div class="row wrap" style="margin-bottom:12px">${avail.map(p=>`<button class="btn sm ghost" data-act="t-add" data-p="${p.id}">${ICON.plus} ${esc(p.nombre)} <span class="mono" style="opacity:.7">(${stock(t.o,p.id)})</span></button>`).join('')}</div>
+ <label>Detalle del traslado <i>detalle[]</i></label>
+ <div class="lh l3"><span>Producto</span><span style="text-align:right">Cant.</span><span></span></div>
+ ${t.lines.map((l,k)=>`<div class="line l3"><div class="pn">${pic(P(l.prod))}<div><b style="font-size:12.5px">${esc(P(l.prod).nombre)}</b><span>Stock en origen: ${stock(t.o,l.prod)}</span></div></div><input type="number" min="1" value="${l.qty}" data-tline="${k}"><button class="x" data-act="t-del" data-k="${k}">×</button></div>`).join('')||'<div class="sub" style="padding:12px 0">Agrega productos.</div>'}
+ ${S.alertT?`<div class="alert ${S.alertT.ok?'ok':'bad'}">${S.alertT.t}</div>`:''}
+ <button class="btn ok" data-act="t-reg" style="width:100%;justify-content:center;margin-top:10px">${ICON.check} Registrar traslado</button>${jsonBox(trJSON())}</div>
+ <div class="card" style="align-self:start"><h2>Seguimiento de traslados</h2><div class="sub">Al <b>enviar</b> el stock baja en el origen; al <b>recibir</b> sube en el destino.</div>
+ ${S.tr.slice().reverse().slice(0,6).map(x=>`<div class="tcard"><div class="hd"><span class="mono" style="font-weight:700">#${x.id}</span><div class="route">${SU(x.o).nombre}${ICON.arrow}${SU(x.d).nombre}</div><span class="sp1"></span><span class="tag ${x.estado=='Pendiente'?'t-warn':x.estado=='Enviado'?'t-info':'t-ok'}">${x.estado}</span></div>
+ <div style="color:var(--mut);font-size:12.5px;margin-top:4px">${x.det.map(d=>`${d.qty} × ${esc(P(d.prod).nombre)}`).join(' · ')}</div>${stepper(x.estado)}
+ <div class="row">${x.estado=='Pendiente'?`<button class="btn sm" data-act="t-env" data-id="${x.id}">Enviar traslado</button><button class="btn sm ghost" data-act="t-rec" data-id="${x.id}">Recibir</button>`:x.estado=='Enviado'?`<button class="btn sm ok" data-act="t-rec" data-id="${x.id}">${ICON.check} Confirmar recepción</button>`:`<span style="color:var(--ok);font-weight:700;font-size:12.5px">Stock actualizado en origen y destino</span>`}</div></div>`).join('')}</div></div>`;
+}
+function tReg(){
+ const t=S.tNew;
+ if(+t.o==+t.d){const m='La sucursal de origen y destino deben ser distintas';S.alertT={ok:false,t:'<b>400 Bad Request</b> · '+m};toast('400','Traslado rechazado',m,false);return render()}
+ if(!t.lines.length){S.alertT={ok:false,t:'Agrega al menos un producto.'};return render()}
+ const id=Math.max(...S.tr.map(x=>x.id))+1;
+ S.tr.push({id,o:+t.o,d:+t.d,usr:ME().id,fecha:now(),estado:'Pendiente',obs:t.obs,det:t.lines.map(l=>({prod:l.prod,qty:l.qty}))});
+ S.alertT={ok:true,t:`<b>201 Created</b> · Traslado #${id} en estado Pendiente. El stock aún no cambia.`};toast('201','Traslado registrado',`idTraslado ${id} · Pendiente`);render();
+}
+function tEnv(id){
+ const x=S.tr.find(t=>t.id==id);
+ if(x.estado!='Pendiente'){toast('409','Conflict','El traslado ya fue enviado',false);return}
+ for(const d of x.det){const q=stock(x.o,d.prod);if(d.qty>q){toast('400','Stock insuficiente en la sucursal de origen',`${P(d.prod).nombre}: disponible ${q}, solicitado ${d.qty}`,false);return}}
+ x.estado='Enviado';x.det.forEach(d=>{addStock(x.o,d.prod,-d.qty);addMov(d.prod,x.usr,x.o,'Salida',d.qty,'Traslado')});
+ toast('200','Traslado enviado y stock descontado en el origen',`#${id} · ${SU(x.o).nombre} → ${SU(x.d).nombre}`);render();
+}
+function tRec(id){
+ const x=S.tr.find(t=>t.id==id);
+ if(x.estado=='Pendiente'){toast('409','Conflict','El traslado aún no ha sido enviado',false);return}
+ if(x.estado=='Recibido'){toast('409','Conflict','El traslado ya fue recibido',false);return}
+ x.estado='Recibido';x.det.forEach(d=>{addStock(x.d,d.prod,d.qty);addMov(d.prod,x.usr,x.d,'Entrada',d.qty,'Traslado')});
+ toast('200','Traslado recibido y stock agregado en el destino',`#${id} · ${SU(x.d).nombre}`);render();
+}
+
+/* ---------- HU04 ---------- */
+function hu04(){
+ let rows=S.inv.filter(i=>i.suc==S.iSuc).map(i=>({i,p:P(i.prod)}));
+ const lowN=rows.filter(r=>r.i.qty<=r.p.min).length,units=rows.reduce((a,r)=>a+r.i.qty,0);
+ if(S.iLow)rows=rows.filter(r=>r.i.qty<=r.p.min);
+ rows.sort((a,b)=>(a.i.qty/a.p.min)-(b.i.qty/b.p.min));
+ return `<div class="row wrap" style="margin-bottom:16px"><div class="seg">${S.suc.slice(0,5).map(s=>`<button class="${S.iSuc==s.id?'on':''}" data-act="i-suc" data-id="${s.id}">${s.nombre}</button>`).join('')}</div><span class="sp1"></span><div class="seg"><button class="${!S.iLow?'on':''}" data-act="i-low" data-v="0">Todo el inventario</button><button class="${S.iLow?'on':''}" data-act="i-low" data-v="1">Solo stock bajo</button></div></div>
+ <div class="grid g3" style="margin-bottom:18px">
+ <div class="card kpi"><div class="ic" style="background:var(--infobg);color:var(--blue)">${ICON.box}</div><div><b>${S.inv.filter(i=>i.suc==S.iSuc).length}</b><span>Productos en ${SU(S.iSuc).nombre}</span></div></div>
+ <div class="card kpi"><div class="ic" style="background:var(--okbg);color:var(--ok)">${ICON.check}</div><div><b>${units}</b><span>Unidades disponibles</span></div></div>
+ <div class="card kpi"><div class="ic" style="background:var(--badbg);color:var(--bad)">${ICON.alert}</div><div><b>${lowN}</b><span>Productos por reponer</span></div></div></div>
+ <div class="card"><h2>Inventario de ${SU(S.iSuc).nombre}</h2><div class="sub">Ordenado por urgencia. La barra compara el stock disponible con el mínimo requerido.</div>
+ <table><tr><th>Producto</th><th>Stock vs. mínimo</th><th class="num">Disponible</th><th class="num">Mínimo</th><th>Ubicación</th><th>Estado</th><th>Acción</th></tr>
+ ${rows.map(({i,p})=>{const pct=Math.min(100,Math.round(i.qty/(p.min*2)*100)),col=i.qty<=p.min?'var(--bad)':i.qty<=p.min*1.5?'#E8A317':'var(--ok)';
+ return `<tr><td><div class="pn">${pic(p)}<div><b>${esc(p.nombre)}</b><span class="mono">${p.cod}</span></div></div></td><td style="width:180px"><div class="bar"><i style="width:${pct}%;background:${col}"></i></div></td><td class="num"><b style="font-size:16px">${i.qty}</b></td><td class="num">${p.min}</td>
+ <td>${S.iEdit==i.id?`<div class="row"><input type="text" id="ub" value="${esc(i.ubic)}" style="width:130px"><button class="btn sm ok" data-act="i-save" data-id="${i.id}">Guardar</button></div>`:`<span class="row" style="gap:6px;white-space:nowrap"><span style="color:var(--blue);display:inline-block;width:16px">${ICON.pin}</span>${esc(i.ubic)} <button class="btn sm ghost" data-act="i-edit" data-id="${i.id}" style="padding:3px 7px">${ICON.edit}</button></span>`}</td>
+ <td>${stBadge(i.qty,p.min)}</td><td>${i.qty<=p.min?`<a class="btn sm" href="#hu02" style="text-decoration:none">Reponer</a> <a class="btn sm ghost" href="#hu03" style="text-decoration:none">Trasladar</a>`:'<span style="color:#9aabbd">—</span>'}</td></tr>`}).join('')}</table>
+ ${S.iLow&&!rows.length?'<div class="alert ok" style="margin-top:12px">No hay productos bajo el mínimo en esta sucursal (200 OK · lista vacía).</div>':''}</div>`;
+}
+
+/* ---------- HU05 ---------- */
+function barChart(data){
+ const W=640,H=250,pl=44,pb=34,max=Math.max(1,...data.map(d=>d.total))*1.12,bw=Math.min(54,(W-pl-10)/data.length-16);
+ const y=v=>H-pb-(v/max)*(H-pb-16);
+ return `<svg class="chart" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5BA8FF"/><stop offset="1" stop-color="#1D6FE8"/></linearGradient></defs>
+ ${[0,.25,.5,.75,1].map(f=>{const v=max*f;return `<line x1="${pl}" x2="${W-6}" y1="${y(v)}" y2="${y(v)}" stroke="#E6ECF4"/><text x="${pl-8}" y="${y(v)+4}" text-anchor="end" font-size="10.5" fill="#7A8DA3" font-family="Inter">${Math.round(v)}</text>`}).join('')}
+ ${data.map((d,k)=>{const x=pl+12+k*((W-pl-20)/data.length)+((W-pl-20)/data.length-bw)/2;return `<rect x="${x}" y="${y(d.total)}" width="${bw}" height="${H-pb-y(d.total)}" rx="7" fill="url(#bg)"/><text x="${x+bw/2}" y="${y(d.total)-7}" text-anchor="middle" font-size="11" font-weight="700" fill="#0F2A43" font-family="Inter">${d.total.toLocaleString('es-PE',{maximumFractionDigits:0})}</text><text x="${x+bw/2}" y="${H-12}" text-anchor="middle" font-size="11" fill="#5B6B7C" font-family="Inter">${d.dia.slice(8)}/${d.dia.slice(5,7)}</text>`}).join('')}</svg>`;
+}
+function salesByDay(){const m={};S.vt.filter(v=>v.estado=='Registrada'&&v.fecha.slice(0,10)>=S.rDesde&&v.fecha.slice(0,10)<=S.rHasta&&(!S.rSuc||v.suc==S.rSuc)).forEach(v=>{const d=v.fecha.slice(0,10);m[d]=(m[d]||0)+v.total});return Object.keys(m).sort().map(d=>({dia:d,total:m[d]}))}
+function hu05(){
+ const ev=S.mv.filter(m=>m.prod==S.kProd&&m.suc==S.kSuc).sort((a,b)=>a.fecha<b.fecha?-1:1);let saldo=0;
+ const evs=ev.map(m=>{saldo+=m.tipo=='Entrada'?m.qty:-m.qty;return{...m,saldo}});
+ const sales=salesByDay(),tot=sales.reduce((a,d)=>a+d.total,0);
+ return `<div class="grid g2b"><div class="card"><h2>Kárdex de un producto</h2><div class="sub">Historial de entradas y salidas, con el saldo después de cada movimiento.</div>
+ <div class="row"><div class="fld sp1"><label>Producto <i>idProducto</i></label><select data-bind="kProd">${S.prod.map(p=>`<option value="${p.id}" ${p.id==S.kProd?'selected':''}>${esc(p.nombre)}</option>`).join('')}</select></div><div class="fld sp1"><label>Sucursal <i>idSucursal</i></label><select data-bind="kSuc">${S.suc.map(s=>`<option value="${s.id}" ${s.id==S.kSuc?'selected':''}>${s.nombre}</option>`).join('')}</select></div></div>
+ <div class="row" style="margin-bottom:14px;padding:12px;background:#F5F8FC;border-radius:12px">${pic(P(S.kProd))}<div class="sp1"><b>${esc(P(S.kProd).nombre)}</b><div style="color:var(--mut);font-size:12px">${SU(S.kSuc).nombre} · mínimo ${P(S.kProd).min}</div></div><div style="text-align:right"><div style="color:var(--mut);font-size:11px;font-weight:700">STOCK ACTUAL</div><b style="font-size:24px">${stock(S.kSuc,S.kProd)}</b></div></div>
+ ${evs.length?`<div class="tl">${evs.map(m=>`<div class="ev"><div class="pt ${m.tipo=='Entrada'?'in':'out'}">${m.tipo=='Entrada'?'↑':'↓'}</div><div class="h"><b>${m.tipo=='Entrada'?'+':'−'}${m.qty} unidades</b><span class="tag ${m.motivo=='Venta'?'t-bad':m.motivo=='Compra'?'t-ok':m.motivo=='Traslado'?'t-info':'t-mut'}">${m.motivo}</span><span class="sp1"></span><span class="mono" style="font-size:12px;color:var(--mut)">saldo ${m.saldo}</span></div><div class="m">${m.fecha.slice(8,10)}/${m.fecha.slice(5,7)}/${m.fecha.slice(0,4)} ${m.fecha.slice(11,16)} · ${esc(US(m.usr).nombre)}</div></div>`).join('')}</div>`:'<div class="alert info">404 Not Found · No hay movimientos para ese producto en la sucursal.</div>'}</div>
+ <div class="card" style="align-self:start"><h2>Reporte de ventas por día</h2><div class="sub">Total vendido en el período. Las ventas anuladas no se cuentan.</div>
+ <div class="row"><div class="fld sp1"><label>Desde <i>desde</i></label><input type="date" data-bind="rDesde" value="${S.rDesde}"></div><div class="fld sp1"><label>Hasta <i>hasta</i></label><input type="date" data-bind="rHasta" value="${S.rHasta}"></div><div class="fld sp1"><label>Sucursal <i>idSucursal</i></label><select data-bind="rSuc"><option value="0">Todas</option>${S.suc.slice(0,5).map(s=>`<option value="${s.id}" ${s.id==S.rSuc?'selected':''}>${s.nombre}</option>`).join('')}</select></div></div>
+ <div class="row" style="margin:6px 0 10px"><div class="sp1"><div style="color:var(--mut);font-size:11px;font-weight:700">TOTAL DEL PERÍODO</div><b style="font-size:26px;letter-spacing:-.02em">${money(tot)}</b></div><div class="legend"><span style="--c:#1D6FE8">Total vendido por día (S/)</span></div></div>
+ ${sales.length?barChart(sales):'<div class="alert info">No hay ventas en el rango seleccionado.</div>'}
+ <table style="margin-top:8px"><tr><th>Día</th><th class="num">Total vendido</th></tr>${sales.map(d=>`<tr><td>${d.dia.slice(8)}/${d.dia.slice(5,7)}/${d.dia.slice(0,4)}</td><td class="num"><b>${money(d.total)}</b></td></tr>`).join('')}</table></div></div>`;
+}
+
+/* ---------- eventos ---------- */
+function setPath(path,val){const k=path.split('.');if(k.length==1){S[k[0]]=val}else{S[k[0]][k[1]]=val}}
+function bind(){
+ document.querySelectorAll('[data-bind]').forEach(el=>el.addEventListener('change',()=>{let v=el.value;const p=el.dataset.bind;if(['vCli','vMp','kProd','kSuc','rSuc','cOrd.prv','cOrd.suc','tNew.o','tNew.d'].includes(p))v=+v;setPath(p,v);if(p=='cOrd.prv'){S.cOrd.lines=[]}if(p=='tNew.o'){S.tNew.lines=[]}render()}));
+ document.querySelectorAll('[data-line]').forEach(el=>el.addEventListener('change',()=>{S.cart[+el.dataset.line][el.dataset.f]=+el.value;render()}));
+ document.querySelectorAll('[data-cline]').forEach(el=>el.addEventListener('change',()=>{S.cOrd.lines[+el.dataset.cline].qty=+el.value;render()}));
+ document.querySelectorAll('[data-tline]').forEach(el=>el.addEventListener('change',()=>{S.tNew.lines[+el.dataset.tline].qty=+el.value;render()}));
+ document.querySelectorAll('[data-act]').forEach(el=>el.addEventListener('click',()=>act(el.dataset,el)));
+}
+function act(d){
+ const a=d.act;
+ if(a=='v-add'){const l=S.cart.find(x=>x.prod==+d.p);if(l)l.qty++;else S.cart.push({prod:+d.p,qty:1,dsc:0});S.alertV=null;render()}
+ else if(a=='v-del'){S.cart.splice(+d.k,1);render()}
+ else if(a=='v-reg')vReg();else if(a=='v-anu')vAnu(+d.id);
+ else if(a=='c-add'){const l=S.cOrd.lines.find(x=>x.prod==+d.p);if(l)l.qty++;else S.cOrd.lines.push({prod:+d.p,qty:1,pu:+d.pc});S.alertC=null;render()}
+ else if(a=='c-del'){S.cOrd.lines.splice(+d.k,1);render()}
+ else if(a=='c-reg')cReg();else if(a=='c-rec')cRec(+d.id);else if(a=='c-f'){S.cFilter=d.f;render()}
+ else if(a=='t-add'){const l=S.tNew.lines.find(x=>x.prod==+d.p);if(l)l.qty++;else S.tNew.lines.push({prod:+d.p,qty:1});S.alertT=null;render()}
+ else if(a=='t-del'){S.tNew.lines.splice(+d.k,1);render()}
+ else if(a=='t-reg')tReg();else if(a=='t-env')tEnv(+d.id);else if(a=='t-rec')tRec(+d.id);
+ else if(a=='i-suc'){S.iSuc=+d.id;render()}else if(a=='i-low'){S.iLow=d.v=='1';render()}
+ else if(a=='i-edit'){S.iEdit=+d.id;render();const e=$('#ub');e&&e.focus()}
+ else if(a=='i-save'){const i=S.inv.find(x=>x.id==+d.id);i.ubic=$('#ub').value||i.ubic;S.iEdit=null;toast('200','Ubicación actualizada',`${P(i.prod).nombre} → ${i.ubic}`);render()}
+}
+window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});
+$('#reset').addEventListener('click',()=>{init();render();toast('200','Datos restablecidos','Se recargó la base de datos de ejemplo')});
+$('#out').addEventListener('click',salir);
+init();
+try{const id=sessionStorage.getItem('mvpSesion');if(id&&US(+id)){const u=US(+id);SESSION={id:u.id,token:fakeJWT(u)};document.body.classList.remove('anon')}}catch(_){}
+render();
+</script>
+</body>
+</html>

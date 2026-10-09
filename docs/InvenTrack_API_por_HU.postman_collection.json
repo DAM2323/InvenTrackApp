@@ -1,0 +1,3209 @@
+{
+  "info": {
+    "_postman_id": "e1a1c0de-0000-4000-8000-000000000064",
+    "name": "InvenTrack - API completa por HU",
+    "description": "Colección de InvenTrack agrupada por historia de usuario (HU01 a HU05) con exactamente los endpoints de cada una, más una carpeta de apoyo con el catálogo y los accesos.\n\nCómo usarla: 1) importar el archivo en Postman, 2) revisar la variable baseUrl (por defecto http://localhost:8080), 3) ejecutar con Run collection en orden (la primera petición, Login, guarda el token JWT y las demás lo envían en Authorization: Bearer): las peticiones se encadenan guardando ids en variables y cada una verifica su código de respuesta.\n\nPara que los casos coincidan con los Word, usar la base cargada desde db/inventrack.sql.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Login - obtener token (ejecutar primero)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Devuelve el token\", function () { pm.expect(pm.response.json().token).to.be.a(\"string\"); });",
+              "pm.collectionVariables.set(\"token\", pm.response.json().token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"admin@inventrack.pe\",\n  \"contrasena\": \"ClaveSegura2026*\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Inicia sesión y guarda el token en la variable token. Todas las demás peticiones lo envían en Authorization: Bearer."
+      },
+      "response": []
+    },
+    {
+      "name": "HU01 - Registrar venta",
+      "item": [
+        {
+          "name": "HU01-EP01 Carga inicial: devuelve la lista de clientes para el desplegable",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cliente/listar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cliente",
+                "listar"
+              ]
+            },
+            "description": "Carga inicial: devuelve la lista de clientes para el desplegable."
+          },
+          "response": []
+        },
+        {
+          "name": "HU01-EP02 Carga inicial: devuelve los métodos de pago",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metodo-pago/listar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodo-pago",
+                "listar"
+              ]
+            },
+            "description": "Carga inicial: devuelve los métodos de pago."
+          },
+          "response": []
+        },
+        {
+          "name": "HU01-EP03 Carga inicial: productos de la sucursal con su stock disponible",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/inventario/listar?idSucursal=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventario",
+                "listar"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Carga inicial: productos de la sucursal con su stock disponible."
+          },
+          "response": []
+        },
+        {
+          "name": "HU01-EP04 Registra la venta con su detalle, descuenta el stock y genera los movimientos de Salida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idVenta\", pm.response.json().idVenta); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/venta/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venta",
+                "registrar"
+              ]
+            },
+            "description": "Registra la venta con su detalle, descuenta el stock y genera los movimientos de Salida.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": 1,\n  \"idSucursal\": 1,\n  \"idMetodoPago\": 1,\n  \"idUsuario\": 2,\n  \"observacion\": \"Venta de mostrador\",\n  \"detalle\": [\n    {\n      \"idProducto\": 1,\n      \"cantidad\": 1,\n      \"precioUnitario\": 1299.0,\n      \"descuento\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "HU01-EP05 Anula la venta y repone el stock en la sucursal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/venta/anular?idVenta={{idVenta}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venta",
+                "anular"
+              ],
+              "query": [
+                {
+                  "key": "idVenta",
+                  "value": "{{idVenta}}"
+                }
+              ]
+            },
+            "description": "Anula la venta y repone el stock en la sucursal."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "HU02 - Reponer mercadería (compra y recepción)",
+      "item": [
+        {
+          "name": "HU02-EP01 Carga inicial: lista de proveedores",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedor/listar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedor",
+                "listar"
+              ]
+            },
+            "description": "Carga inicial: lista de proveedores."
+          },
+          "response": []
+        },
+        {
+          "name": "HU02-EP02 Carga inicial: productos que vende cada proveedor con su precio de compra",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/producto-proveedor/listar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto-proveedor",
+                "listar"
+              ]
+            },
+            "description": "Carga inicial: productos que vende cada proveedor con su precio de compra."
+          },
+          "response": []
+        },
+        {
+          "name": "HU02-EP03 Lista las órdenes de la sucursal, filtradas por estado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orden-compra/listar?idSucursal=1&estado=Pendiente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orden-compra",
+                "listar"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "1"
+                },
+                {
+                  "key": "estado",
+                  "value": "Pendiente"
+                }
+              ]
+            },
+            "description": "Lista las órdenes de la sucursal, filtradas por estado."
+          },
+          "response": []
+        },
+        {
+          "name": "HU02-EP04 Registra la orden con su detalle en estado Pendiente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idCompra\", pm.response.json().idCompra); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orden-compra/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orden-compra",
+                "registrar"
+              ]
+            },
+            "description": "Registra la orden con su detalle en estado Pendiente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idProveedor\": 1,\n  \"idSucursal\": 1,\n  \"idUsuario\": 1,\n  \"observacion\": \"Reposición de electrónica\",\n  \"detalle\": [\n    {\n      \"idProducto\": 1,\n      \"cantidad\": 5,\n      \"precioUnitario\": 950.0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "HU02-EP05 Confirma la recepción: sube el stock y registra los movimientos de Entrada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orden-compra/recibir?idCompra={{idCompra}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orden-compra",
+                "recibir"
+              ],
+              "query": [
+                {
+                  "key": "idCompra",
+                  "value": "{{idCompra}}"
+                }
+              ]
+            },
+            "description": "Confirma la recepción: sube el stock y registra los movimientos de Entrada."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "HU03 - Trasladar mercadería entre sucursales",
+      "item": [
+        {
+          "name": "HU03-EP01 Carga inicial: lista de sucursales para origen y destino",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sucursal/listar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sucursal",
+                "listar"
+              ]
+            },
+            "description": "Carga inicial: lista de sucursales para origen y destino."
+          },
+          "response": []
+        },
+        {
+          "name": "HU03-EP02 Stock de la sucursal de origen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/inventario/listar?idSucursal=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventario",
+                "listar"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Stock de la sucursal de origen."
+          },
+          "response": []
+        },
+        {
+          "name": "HU03-EP03 Registra el traslado con su detalle en estado Pendiente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idTraslado\", pm.response.json().idTraslado); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/traslado/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "traslado",
+                "registrar"
+              ]
+            },
+            "description": "Registra el traslado con su detalle en estado Pendiente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idSucursalOrigen\": 1,\n  \"idSucursalDestino\": 2,\n  \"idUsuario\": 4,\n  \"observacion\": \"Televisores para Miraflores\",\n  \"detalle\": [\n    {\n      \"idProducto\": 1,\n      \"cantidad\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "HU03-EP04 Envía el traslado: descuenta el stock del origen y registra la Salida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/traslado/enviar?idTraslado={{idTraslado}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "traslado",
+                "enviar"
+              ],
+              "query": [
+                {
+                  "key": "idTraslado",
+                  "value": "{{idTraslado}}"
+                }
+              ]
+            },
+            "description": "Envía el traslado: descuenta el stock del origen y registra la Salida."
+          },
+          "response": []
+        },
+        {
+          "name": "HU03-EP05 Recibe el traslado: suma el stock en el destino y registra la Entrada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/traslado/recibir?idTraslado={{idTraslado}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "traslado",
+                "recibir"
+              ],
+              "query": [
+                {
+                  "key": "idTraslado",
+                  "value": "{{idTraslado}}"
+                }
+              ]
+            },
+            "description": "Recibe el traslado: suma el stock en el destino y registra la Entrada."
+          },
+          "response": []
+        },
+        {
+          "name": "HU03-EP06 Lista los traslados de una sucursal, filtrados por estado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/traslado/listar?idSucursal=1&estado=Pendiente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "traslado",
+                "listar"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "1"
+                },
+                {
+                  "key": "estado",
+                  "value": "Pendiente"
+                }
+              ]
+            },
+            "description": "Lista los traslados de una sucursal, filtrados por estado."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "HU04 - Inventario y alertas de stock bajo",
+      "item": [
+        {
+          "name": "HU04-EP01 Lista el inventario de una sucursal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/inventario/listar?idSucursal=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventario",
+                "listar"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Lista el inventario de una sucursal."
+          },
+          "response": []
+        },
+        {
+          "name": "HU04-EP02 Busca el stock de un producto en una sucursal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/inventario/buscar?idSucursal=1&idProducto=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventario",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "1"
+                },
+                {
+                  "key": "idProducto",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Busca el stock de un producto en una sucursal."
+          },
+          "response": []
+        },
+        {
+          "name": "HU04-EP03 Productos con cantidad disponible menor o igual al stock mínimo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reporte/stock-bajo?idSucursal=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reporte",
+                "stock-bajo"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Productos con cantidad disponible menor o igual al stock mínimo."
+          },
+          "response": []
+        },
+        {
+          "name": "HU04-EP04 Actualiza la ubicación física del producto en la sucursal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/inventario/actualizar-ubicacion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventario",
+                "actualizar-ubicacion"
+              ]
+            },
+            "description": "Actualiza la ubicación física del producto en la sucursal.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idInventario\": 1,\n  \"ubicacion\": \"Pasillo Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "HU05 - Kárdex y reporte de ventas",
+      "item": [
+        {
+          "name": "HU05-EP01 Lista los movimientos de una sucursal en un período",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimiento/listar?idSucursal=1&desde=2026-09-01&hasta=2026-09-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimiento",
+                "listar"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "1"
+                },
+                {
+                  "key": "desde",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-09-30"
+                }
+              ]
+            },
+            "description": "Lista los movimientos de una sucursal en un período."
+          },
+          "response": []
+        },
+        {
+          "name": "HU05-EP02 Historial de movimientos de un producto en una sucursal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimiento/kardex?idProducto=1&idSucursal=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimiento",
+                "kardex"
+              ],
+              "query": [
+                {
+                  "key": "idProducto",
+                  "value": "1"
+                },
+                {
+                  "key": "idSucursal",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Historial de movimientos de un producto en una sucursal."
+          },
+          "response": []
+        },
+        {
+          "name": "HU05-EP03 Total vendido por día en un rango de fechas (idSucursal opcional)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reporte/ventas?desde=2026-09-01&hasta=2026-09-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reporte",
+                "ventas"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-09-30"
+                }
+              ]
+            },
+            "description": "Total vendido por día en un rango de fechas (idSucursal opcional)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Apoyo - Catálogo y accesos (no pertenecen a una HU)",
+      "item": [
+        {
+          "name": "EP01 Iniciar sesión (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"rol = Administrador\", function () { pm.expect(pm.response.json().rol).to.eql(\"Administrador\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"admin@inventrack.pe\",\n  \"contrasena\": \"ClaveSegura2026*\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP01 Contraseña incorrecta (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"admin@inventrack.pe\",\n  \"contrasena\": \"incorrecta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP07 Registrar sucursal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idSucursalNueva\", pm.response.json().id); }",
+                  "pm.test(\"activo = True\", function () { pm.expect(pm.response.json().activo).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sucursal/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sucursal",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sucursal de prueba\",\n  \"direccion\": \"Av. Prueba 100\",\n  \"telefono\": \"01-5550000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP08 Actualizar sucursal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"nombre = Sucursal editada\", function () { pm.expect(pm.response.json().nombre).to.eql(\"Sucursal editada\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sucursal/actualizar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sucursal",
+                "actualizar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{idSucursalNueva}},\n  \"nombre\": \"Sucursal editada\",\n  \"direccion\": \"Av. Prueba 200\",\n  \"telefono\": \"01-5550001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP10 Buscar sucursal por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sucursal/buscar-por-id?idSucursal={{idSucursalNueva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sucursal",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "{{idSucursalNueva}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP10 Buscar sucursal inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sucursal/buscar-por-id?idSucursal=999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sucursal",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "999999"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP02 Registrar usuario",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"correoNuevo\", \"prueba#@inventrack.pe\".replace(\"#\", Date.now()));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idUsuarioNuevo\", pm.response.json().id); }",
+                  "pm.test(\"No devuelve la contraseña\", function () { pm.expect(pm.response.json()).to.not.have.property(\"contrasena\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuario/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuario",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idSucursal\": 1,\n  \"nombre\": \"Usuario de prueba\",\n  \"correo\": \"{{correoNuevo}}\",\n  \"contrasena\": \"Abc12345\",\n  \"rol\": \"Almacen\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP02 Correo repetido (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuario/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuario",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idSucursal\": 1,\n  \"nombre\": \"Repetido\",\n  \"correo\": \"{{correoNuevo}}\",\n  \"contrasena\": \"Abc12345\",\n  \"rol\": \"Almacen\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP01 Iniciar sesión con el usuario nuevo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Comprueba que la contraseña se guardó cifrada con BCrypt y se puede validar.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correoNuevo}}\",\n  \"contrasena\": \"Abc12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP03 Actualizar usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"nombre = Usuario editado\", function () { pm.expect(pm.response.json().nombre).to.eql(\"Usuario editado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuario/actualizar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuario",
+                "actualizar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUsuario\": {{idUsuarioNuevo}},\n  \"idSucursal\": 2,\n  \"nombre\": \"Usuario editado\",\n  \"correo\": \"{{correoNuevo}}\",\n  \"rol\": \"Vendedor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP04 Listar usuarios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Devuelve una lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuario/listar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuario",
+                "listar"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP05 Buscar usuario por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuario/buscar-por-id?idUsuario={{idUsuarioNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuario",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "{{idUsuarioNuevo}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP06 Dar de baja usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuario/eliminar?idUsuario={{idUsuarioNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuario",
+                "eliminar"
+              ],
+              "query": [
+                {
+                  "key": "idUsuario",
+                  "value": "{{idUsuarioNuevo}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP01 Usuario dado de baja no entra (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correoNuevo}}\",\n  \"contrasena\": \"Abc12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP11 Dar de baja sucursal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sucursal/eliminar?idSucursal={{idSucursalNueva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sucursal",
+                "eliminar"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "{{idSucursalNueva}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP12 Registrar categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idCategoriaNueva\", pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categoria/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoria",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Categoría de prueba\",\n  \"descripcion\": \"Solo para pruebas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP13 Actualizar categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"nombre = Categoría editada\", function () { pm.expect(pm.response.json().nombre).to.eql(\"Categor\\u00eda editada\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/categoria/actualizar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoria",
+                "actualizar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{idCategoriaNueva}},\n  \"nombre\": \"Categoría editada\",\n  \"descripcion\": \"Editada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP14 Listar categorías",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Devuelve una lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoria/listar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoria",
+                "listar"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP15 Buscar categoría por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoria/buscar-por-id?idCategorias={{idCategoriaNueva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoria",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idCategorias",
+                  "value": "{{idCategoriaNueva}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP16 Eliminar categoría con productos (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoria/eliminar?idCategorias=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoria",
+                "eliminar"
+              ],
+              "query": [
+                {
+                  "key": "idCategorias",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP16 Eliminar categoría sin productos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categoria/eliminar?idCategorias={{idCategoriaNueva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "categoria",
+                "eliminar"
+              ],
+              "query": [
+                {
+                  "key": "idCategorias",
+                  "value": "{{idCategoriaNueva}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP17 Registrar marca",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idMarcaNueva\", pm.response.json().id); }",
+                  "pm.test(\"activo = True\", function () { pm.expect(pm.response.json().activo).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/marca/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marca",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Marca de prueba\",\n  \"descripcion\": \"Solo para pruebas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP18 Actualizar marca",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"nombre = Marca editada\", function () { pm.expect(pm.response.json().nombre).to.eql(\"Marca editada\"); });",
+                  "pm.test(\"activo = True\", function () { pm.expect(pm.response.json().activo).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/marca/actualizar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marca",
+                "actualizar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{idMarcaNueva}},\n  \"nombre\": \"Marca editada\",\n  \"descripcion\": \"Editada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP19 Listar marcas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Devuelve una lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/marca/listar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marca",
+                "listar"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP20 Buscar marca por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/marca/buscar-por-id?idMarca={{idMarcaNueva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marca",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idMarca",
+                  "value": "{{idMarcaNueva}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP21 Dar de baja marca",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/marca/eliminar?idMarca={{idMarcaNueva}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "marca",
+                "eliminar"
+              ],
+              "query": [
+                {
+                  "key": "idMarca",
+                  "value": "{{idMarcaNueva}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP22 Registrar producto",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"codigoProducto\", \"TEST-#\".replace(\"#\", Date.now()));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idProductoNuevo\", pm.response.json().id); }",
+                  "pm.test(\"activo = True\", function () { pm.expect(pm.response.json().activo).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/producto/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoria\": {\n    \"id\": 1\n  },\n  \"marca\": {\n    \"id\": 2\n  },\n  \"codigo\": \"{{codigoProducto}}\",\n  \"nombre\": \"Audífonos de prueba\",\n  \"descripcion\": \"Inalámbricos\",\n  \"precioVenta\": 89.9,\n  \"precioCosto\": 55.0,\n  \"stockMinimo\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP22 Código repetido (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/producto/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoria\": {\n    \"id\": 1\n  },\n  \"codigo\": \"{{codigoProducto}}\",\n  \"nombre\": \"Repetido\",\n  \"precioVenta\": 10,\n  \"precioCosto\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP22 Categoría inexistente (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/producto/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoria\": {\n    \"id\": 999999\n  },\n  \"codigo\": \"NO-EXISTE\",\n  \"nombre\": \"X\",\n  \"precioVenta\": 10,\n  \"precioCosto\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP23 Actualizar producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"nombre = Audífonos editados\", function () { pm.expect(pm.response.json().nombre).to.eql(\"Aud\\u00edfonos editados\"); });",
+                  "pm.test(\"activo = True\", function () { pm.expect(pm.response.json().activo).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/producto/actualizar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto",
+                "actualizar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{idProductoNuevo}},\n  \"categoria\": {\n    \"id\": 1\n  },\n  \"marca\": {\n    \"id\": 2\n  },\n  \"codigo\": \"{{codigoProducto}}\",\n  \"nombre\": \"Audífonos editados\",\n  \"descripcion\": \"Inalámbricos\",\n  \"precioVenta\": 99.9,\n  \"precioCosto\": 55.0,\n  \"stockMinimo\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP24 Listar productos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Devuelve una lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/producto/listar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto",
+                "listar"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP25 Buscar producto por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/producto/buscar-por-id?idProducto={{idProductoNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idProducto",
+                  "value": "{{idProductoNuevo}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP26 Dar de baja producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/producto/eliminar?idProducto={{idProductoNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto",
+                "eliminar"
+              ],
+              "query": [
+                {
+                  "key": "idProducto",
+                  "value": "{{idProductoNuevo}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP25 El producto queda inactivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"activo = False\", function () { pm.expect(pm.response.json().activo).to.eql(false); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/producto/buscar-por-id?idProducto={{idProductoNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idProducto",
+                  "value": "{{idProductoNuevo}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP27 Registrar cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idClienteNuevo\", pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cliente/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cliente",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Cliente de prueba\",\n  \"documento\": \"99999999\",\n  \"telefono\": \"999000111\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP28 Actualizar cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"nombre = Cliente editado\", function () { pm.expect(pm.response.json().nombre).to.eql(\"Cliente editado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cliente/actualizar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cliente",
+                "actualizar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{idClienteNuevo}},\n  \"nombre\": \"Cliente editado\",\n  \"documento\": \"99999999\",\n  \"telefono\": \"999000111\",\n  \"correo\": \"cliente@prueba.pe\",\n  \"direccion\": \"Av. Prueba 100\",\n  \"fechaRegistro\": \"2026-09-01T10:00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP30 Buscar cliente por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cliente/buscar-por-id?idCliente={{idClienteNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cliente",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idCliente",
+                  "value": "{{idClienteNuevo}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP31 Eliminar cliente con ventas (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cliente/eliminar?idCliente=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cliente",
+                "eliminar"
+              ],
+              "query": [
+                {
+                  "key": "idCliente",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP31 Eliminar cliente sin ventas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cliente/eliminar?idCliente={{idClienteNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cliente",
+                "eliminar"
+              ],
+              "query": [
+                {
+                  "key": "idCliente",
+                  "value": "{{idClienteNuevo}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP32 Registrar método de pago",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idMetodoPagoNuevo\", pm.response.json().id); }",
+                  "pm.test(\"activo = True\", function () { pm.expect(pm.response.json().activo).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/metodo-pago/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodo-pago",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Método de prueba\",\n  \"descripcion\": \"Solo para pruebas\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP33 Actualizar método de pago",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"activo = True\", function () { pm.expect(pm.response.json().activo).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/metodo-pago/actualizar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodo-pago",
+                "actualizar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{idMetodoPagoNuevo}},\n  \"nombre\": \"Método editado\",\n  \"descripcion\": \"Editado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP35 Buscar método de pago por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metodo-pago/buscar-por-id?idMetodoPago={{idMetodoPagoNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodo-pago",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idMetodoPago",
+                  "value": "{{idMetodoPagoNuevo}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP36 Dar de baja método de pago",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/metodo-pago/eliminar?idMetodoPago={{idMetodoPagoNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "metodo-pago",
+                "eliminar"
+              ],
+              "query": [
+                {
+                  "key": "idMetodoPago",
+                  "value": "{{idMetodoPagoNuevo}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP38 Buscar venta por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Trae el detalle\", function () { pm.expect(pm.response.json().detalle.length).to.be.above(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/venta/buscar-por-id?idVenta={{idVenta}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venta",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idVenta",
+                  "value": "{{idVenta}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP39 Listar ventas por sucursal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Devuelve una lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/venta/listar?idSucursal=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "venta",
+                "listar"
+              ],
+              "query": [
+                {
+                  "key": "idSucursal",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP41 Registrar proveedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idProveedorNuevo\", pm.response.json().id); }",
+                  "pm.test(\"Queda activo\", function () { pm.expect(pm.response.json().activo).to.eql(true); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proveedor/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedor",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Proveedor Prueba SAC\",\n  \"rfcNit\": \"20{{$timestamp}}\",\n  \"telefono\": \"999888777\",\n  \"correo\": \"ventas@prueba.pe\",\n  \"direccion\": \"Av. Lima 123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP44 Buscar proveedor por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedor/buscar-por-id?idProveedor={{idProveedorNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedor",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idProveedor",
+                  "value": "{{idProveedorNuevo}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP42 Actualizar proveedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Nombre actualizado\", function () { pm.expect(pm.response.json().nombre).to.eql(\"Proveedor Prueba EDITADO\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proveedor/actualizar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedor",
+                "actualizar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idProveedor\": {{idProveedorNuevo}},\n  \"nombre\": \"Proveedor Prueba EDITADO\",\n  \"rfcNit\": \"20{{$timestamp}}\",\n  \"telefono\": \"999888777\",\n  \"correo\": \"ventas@prueba.pe\",\n  \"direccion\": \"Av. Lima 123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP44 Buscar proveedor inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedor/buscar-por-id?idProveedor=999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedor",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idProveedor",
+                  "value": "999999"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP46 Registrar producto-proveedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"idProductoProveedor\", pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/producto-proveedor/registrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto-proveedor",
+                "registrar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idProducto\": 2,\n  \"idProveedor\": {{idProveedorNuevo}},\n  \"codigoProveedor\": \"PP-FOCO\",\n  \"precioCompra\": 6.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP49 Buscar producto-proveedor por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/producto-proveedor/buscar-por-id?idProductoProveedor={{idProductoProveedor}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto-proveedor",
+                "buscar-por-id"
+              ],
+              "query": [
+                {
+                  "key": "idProductoProveedor",
+                  "value": "{{idProductoProveedor}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP47 Actualizar producto-proveedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/producto-proveedor/actualizar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto-proveedor",
+                "actualizar"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idProductoProveedor\": {{idProductoProveedor}},\n  \"idProducto\": 2,\n  \"idProveedor\": {{idProveedorNuevo}},\n  \"codigoProveedor\": \"PP-FOCO-2\",\n  \"precioCompra\": 6.9\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EP50 Dar de baja producto-proveedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/producto-proveedor/eliminar?idProductoProveedor={{idProductoProveedor}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "producto-proveedor",
+                "eliminar"
+              ],
+              "query": [
+                {
+                  "key": "idProductoProveedor",
+                  "value": "{{idProductoProveedor}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "EP45 Dar de baja proveedor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedor/eliminar?idProveedor={{idProveedorNuevo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proveedor",
+                "eliminar"
+              ],
+              "query": [
+                {
+                  "key": "idProveedor",
+                  "value": "{{idProveedorNuevo}}"
+                }
+              ]
+            },
+            "description": "Deja inactivo al proveedor creado en EP41, para el caso TC-011."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "idSucursalNueva",
+      "value": ""
+    },
+    {
+      "key": "idUsuarioNuevo",
+      "value": ""
+    },
+    {
+      "key": "idCategoriaNueva",
+      "value": ""
+    },
+    {
+      "key": "idMarcaNueva",
+      "value": ""
+    },
+    {
+      "key": "idProductoNuevo",
+      "value": ""
+    },
+    {
+      "key": "idClienteNuevo",
+      "value": ""
+    },
+    {
+      "key": "idMetodoPagoNuevo",
+      "value": ""
+    },
+    {
+      "key": "idVenta",
+      "value": ""
+    },
+    {
+      "key": "idProveedorNuevo",
+      "value": ""
+    },
+    {
+      "key": "idProductoProveedor",
+      "value": ""
+    },
+    {
+      "key": "idCompra",
+      "value": ""
+    },
+    {
+      "key": "correoNuevo",
+      "value": ""
+    },
+    {
+      "key": "codigoProducto",
+      "value": ""
+    },
+    {
+      "key": "idTraslado",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
