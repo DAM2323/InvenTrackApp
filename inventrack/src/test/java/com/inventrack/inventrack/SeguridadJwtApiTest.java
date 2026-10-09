@@ -1,7 +1,9 @@
 package com.inventrack.inventrack;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -78,5 +80,19 @@ class SeguridadJwtApiTest {
                 .andExpect(status().isOk());
         mvc.perform(get("/inventario/listar").param("idSucursal", "1").header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void laPaginaDeInicioEsPublica() throws Exception {
+        mvc.perform(get("/index.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("InvenTrack API")));
+    }
+
+    @Test
+    void getEnLoginRespondeJsonConMetodoNoPermitido() throws Exception {
+        mvc.perform(get("/auth/login"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.mensaje").value("Método GET no permitido en esta ruta"));
     }
 }

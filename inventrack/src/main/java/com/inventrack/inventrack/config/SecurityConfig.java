@@ -21,7 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 
 /**
- * Seguridad con token JWT: solo POST /auth/login es público; el resto de endpoints
+ * Seguridad con token JWT: solo la página de inicio y POST /auth/login son públicos; el resto de endpoints
  * exige el header "Authorization: Bearer <token>".
  */
 @Configuration
@@ -37,7 +37,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(a -> a
-                .requestMatchers("/auth/login").permitAll()
+                .requestMatchers("/", "/index.html", "/auth/login").permitAll()
                 .anyRequest().authenticated())
             .oauth2ResourceServer(o -> o
                 .jwt(Customizer.withDefaults())

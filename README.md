@@ -18,6 +18,8 @@ Proyecto base listo para implementar las historias de usuario del negocio (venta
 
 Seguridad: `POST /auth/login` devuelve un token y el resto de endpoints exige el header `Authorization: Bearer <token>`.
 
+Página de inicio: `http://localhost:8080/` permite iniciar sesión y probar todos los endpoints desde el navegador.
+
 ## Ejecutar
 ```
 cd inventrack
