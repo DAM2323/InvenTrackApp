@@ -34,7 +34,7 @@ import com.inventrack.inventrack.repository.InventarioRepository;
         "spring.jpa.hibernate.ddl-auto=none",
         "spring.jpa.show-sql=false"
 })
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 @Transactional
 class Hu04InventarioApiTest {
 

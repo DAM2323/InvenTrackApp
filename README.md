@@ -14,7 +14,9 @@ Proyecto base listo para implementar las historias de usuario del negocio (venta
 - `Dockerfile` para el despliegue en Render.
 
 ## Variables de entorno
-`DB_URL`, `DB_USER`, `DB_PASSWORD`, `DB_INIT` (true solo en una base vacía) y `PORT`.
+`DB_URL`, `DB_USER`, `DB_PASSWORD`, `DB_INIT` (true solo en una base vacía), `PORT`, `JWT_SECRET` (clave del token JWT, 32 caracteres o más; en producción definir una propia) y `JWT_EXPIRACION_HORAS` (por defecto 2).
+
+Seguridad: `POST /auth/login` devuelve un token y el resto de endpoints exige el header `Authorization: Bearer <token>`.
 
 ## Ejecutar
 ```

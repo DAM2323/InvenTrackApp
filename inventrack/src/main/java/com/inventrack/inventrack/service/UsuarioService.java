@@ -21,6 +21,7 @@ public class UsuarioService {
     private final UsuarioRepository repo;
     private final SucursalRepository sucursalRepo;
     private final PasswordEncoder encoder;
+    private final JwtService jwtService;
 
     public Usuario registrar(UsuarioRequest r) {
         if (r.contrasena() == null || r.contrasena().isBlank()) {
@@ -70,7 +71,7 @@ public class UsuarioService {
         repo.save(u);
     }
 
-    /** EP01: valida credenciales y actualiza el último acceso. */
+    /** EP01: valida credenciales, actualiza el último acceso y devuelve el token JWT. */
     public Map<String, Object> login(LoginRequest r) {
         Usuario u = repo.findByCorreo(r.correo())
             .filter(x -> Boolean.TRUE.equals(x.getActivo()))
@@ -80,7 +81,8 @@ public class UsuarioService {
         }
         u.setAcceso(LocalDateTime.now());
         repo.save(u);
-        return Map.of("idUsuario", u.getId(), "nombre", u.getNombre(),
+        return Map.of("idUsuario", u.getId(), "bearer", "Bearer", "nombreCompleto", u.getNombre(),
+                      "token", jwtService.generar(u), "nombre", u.getNombre(),
                       "rol", u.getRol(), "idSucursal", u.getSucursal().getId());
     }
 
