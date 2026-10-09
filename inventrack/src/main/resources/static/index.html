@@ -36,6 +36,10 @@
   <label for="clave">Contraseña</label><input id="clave" type="password" value="ClaveSegura2026*" size="18">
   <button class="go" id="entrar">Iniciar sesión</button> <button id="salir">Cerrar sesión</button>
   <p id="estado"></p>
+  <div id="tokenbox" style="display:none">
+    <label for="tok">Token (JWT)</label> <button id="copiartok">Copiar token</button>
+    <textarea id="tok" readonly rows="4" style="min-height:70px;background:#f0f4f8;color:#1f2933;font-size:12px"></textarea>
+  </div>
 </div>
 
 <strong>2. Prueba los endpoints</strong> <span style="color:#52606d;font-size:13px">(HU01 a HU05 y, abajo, los de apoyo). Puedes editar la URL y el body antes de pulsar Probar.</span>
@@ -50,6 +54,8 @@ let nombre = sessionStorage.getItem('nombre') || '';
 const estado = document.getElementById('estado');
 
 function pintarEstado() {
+  document.getElementById('tokenbox').style.display = token ? 'block' : 'none';
+  document.getElementById('tok').value = token;
   if (token) { estado.className = 'ok'; estado.textContent = 'Sesión iniciada como ' + nombre + '. El token se envía solo en cada prueba.'; }
   else { estado.className = ''; estado.textContent = 'Sin sesión: inicia sesión para poder probar los endpoints.'; }
 }
@@ -63,6 +69,7 @@ async function entrar() {
   } catch (e) { estado.className = 'err'; estado.textContent = 'No se pudo conectar: ' + e.message; }
 }
 document.getElementById('entrar').onclick = entrar;
+document.getElementById('copiartok').onclick = () => copiar(token);
 document.getElementById('salir').onclick = () => { token = ''; nombre = ''; sessionStorage.clear(); pintarEstado(); };
 
 function copiar(texto) {
