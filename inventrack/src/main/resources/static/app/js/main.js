@@ -1,7 +1,7 @@
 // Arranque, login, shell y enrutador por #hash. Cada HU vive en js/views/<nombre>.js y exporta render(view).
 import { state, guardarSesion, sucursalNombre } from './state.js';
 import { api, login, onSesionExpirada } from './api.js';
-import { $, $$, escape, icon, brand, head, empty } from './ui.js';
+import { $, escape, icon, brand, head, empty } from './ui.js';
 
 const rutas = [
   ['ventas', 'Ventas', 'list'], ['compras', 'Compras', 'file'], ['traslados', 'Traslados', 'arrow'],
@@ -39,7 +39,7 @@ async function cargarSucursales() {
 
 function shell(activa) {
   const iniciales = state.user.nombre.split(' ').filter(Boolean).slice(0, 2).map(n => n[0]).join('').toUpperCase();
-  $('#app').innerHTML = `<aside class="side">${brand()}<nav>${nav(activa)}</nav><div class="side-foot"><strong>Sucursal actual</strong>${escape(sucursalNombre())}<button class="btn secondary" id="salir" type="button">${icon('logout')} Salir</button></div></aside><div class="layout"><header class="topbar">${brand()}<span class="pill">${icon('box')} ${escape(sucursalNombre())}</span><div class="user-top"><span><b>${escape(state.user.nombre)}</b>${escape(state.user.rol)}</span><div class="avatar">${escape(iniciales)}</div></div></header><div class="warehouse-bar"><div class="warehouse-icon">${icon('box')}</div><div><label for="sucursal-selector">Sucursal actual</label><select id="sucursal-selector">${state.sucursales.map(s => `<option value="${s.id}" ${s.id === state.sucursalId ? 'selected' : ''}>${escape(s.nombre)}</option>`).join('')}</select></div></div><main class="content" id="view"></main></div><nav class="bottom-nav" aria-label="Navegación principal">${nav(activa)}</nav>`;
+  $('#app').innerHTML = `<aside class="side">${brand()}<nav>${nav(activa)}</nav><div class="side-foot"><strong>Sucursal actual</strong>${escape(sucursalNombre())}</div></aside><div class="layout"><header class="topbar">${brand()}<span class="pill">${icon('box')} ${escape(sucursalNombre())}</span><div class="user-top"><span><b>${escape(state.user.nombre)}</b>${escape(state.user.rol)}</span><div class="avatar">${escape(iniciales)}</div><button class="icon-button" id="salir" type="button" aria-label="Cerrar sesión" title="Cerrar sesión">${icon('logout')}</button></div></header><div class="warehouse-bar"><div class="warehouse-icon">${icon('box')}</div><div><label for="sucursal-selector">Sucursal actual</label><select id="sucursal-selector">${state.sucursales.map(s => `<option value="${s.id}" ${s.id === state.sucursalId ? 'selected' : ''}>${escape(s.nombre)}</option>`).join('')}</select></div></div><main class="content" id="view"></main></div><nav class="bottom-nav" aria-label="Navegación principal">${nav(activa)}</nav>`;
   $('#sucursal-selector').onchange = e => {
     state.sucursalId = Number(e.target.value);
     try { localStorage.setItem('inventrack-sucursal-' + state.user.idUsuario, String(state.sucursalId)); } catch { /* sin storage */ }
